@@ -17,7 +17,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Semi+Condensed:wght@600;700;800&display=swap">
 <style>
 [hidden] { display: none !important; }
-/* Layout: one-column iPhone app. Sticky To Crans/Home tabs, next departures, then an hour-by-hour grid. */
+/* Layout: one-column iPhone app. Sticky To town/Back home tabs, next departures, then an hour-by-hour grid. */
 :root {
   --bg: #F3F6FA;
   --surface: #FFFFFF;
@@ -58,7 +58,7 @@ header { display: flex; align-items: center; justify-content: space-between; gap
 .season span { font-size: 12px; color: var(--mute); }
 
 .tabs { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding-block: 6px; background: var(--bg); }
-.tab { appearance: none; border: 0; border-radius: 14px; padding: 12px 8px 10px; font-family: var(--display); font-weight: 800; font-size: 26px; letter-spacing: .03em; text-transform: uppercase; cursor: pointer; background: var(--surface); color: var(--mute); box-shadow: inset 0 0 0 1.5px var(--rule); }
+.tab { appearance: none; border: 0; border-radius: 14px; padding: 12px 8px 10px; font-family: var(--display); font-weight: 800; font-size: 24px; letter-spacing: .01em; text-transform: uppercase; white-space: nowrap; cursor: pointer; background: var(--surface); color: var(--mute); box-shadow: inset 0 0 0 1.5px var(--rule); }
 .tab small { display: block; white-space: nowrap; font-family: var(--body); font-weight: 500; font-size: 12px; letter-spacing: 0; text-transform: none; margin-top: 2px; }
 .tab[aria-selected="true"].aller { background: var(--sky); color: #fff; box-shadow: none; }
 .tab[aria-selected="true"].retour { background: var(--red); color: #fff; box-shadow: none; }
@@ -121,7 +121,10 @@ header { display: flex; align-items: center; justify-content: space-between; gap
 .tip p { margin: 0; font-size: 15px; line-height: 1.4; }
 
 .note { font-size: 12px; color: var(--mute); line-height: 1.5; }
+.stops { margin: 0; background: var(--surface); border-radius: 14px; padding: 12px 14px; font-size: 15px; line-height: 1.45; }
+.stops b { color: var(--navy); }
 .banner { background: var(--surface); border-left: 4px solid var(--navy); border-radius: 10px; padding: 10px 12px; font-size: 14px; line-height: 1.4; }
+@media (max-width: 350px) { .tab { font-size: 20px; } .tab small { font-size: 11px; } }
 @media (min-width: 500px) { .chips { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 .wrap { padding-bottom: calc(90px + env(safe-area-inset-bottom, 0px)); }
 #sec-bus, #sec-pistes, #sec-restos, #sec-contacts { display: flex; flex-direction: column; gap: 14px; }
@@ -177,11 +180,13 @@ header { display: flex; align-items: center; justify-content: space-between; gap
 
   <div id="sec-bus">
   <div class="tabs" role="tablist">
-    <button class="tab aller" id="tab-aller" role="tab" aria-selected="true">To Crans<small>from La Concorde</small></button>
-    <button class="tab retour" id="tab-retour" role="tab" aria-selected="false">Home<small>back to La Concorde</small></button>
+    <button class="tab aller" id="tab-aller" role="tab" aria-selected="true">To town<small>from La Concorde</small></button>
+    <button class="tab retour" id="tab-retour" role="tab" aria-selected="false">Back home<small>to La Concorde</small></button>
   </div>
 
   <div id="view-main">
+
+  <p class="stops" id="stops"></p>
 
   <div class="banner" id="banner" hidden></div>
 
@@ -369,7 +374,7 @@ header { display: flex; align-items: center; justify-content: space-between; gap
   function legendHTML() {
     const items = dir === 'aller'
       ? [[432, 'Les Ehripis → Vermala', 'via Télé Cry d’Er'], [433, 'Les Ehripis → Centre Valaisan', 'via Télé Cry d’Er and Ycoor'], [353, 'PostBus to Crans-Montana', 'board at Pirraparc']]
-      : [[432, 'Vermala → Les Ehripis', 'board at Grand-Place'], [433, 'Centre Valaisan → Les Ehripis', 'board at Mérignou'], [353, 'PostBus to Lens', 'board at Mérignou']];
+      : [[432, 'Vermala → Les Ehripis', 'board at Grand-Place'], [433, 'Centre Valaisan → Les Ehripis', 'board at Mérignou'], [353, 'PostBus to Lens', 'board at Mérignou, get off at Pirraparc']];
     return items.map(([l, a, b]) => `<div class="lg"><span class="badge b${l}">${l}</span><div><b>${a}</b> <span class="m">${b}</span></div></div>`).join('');
   }
 
@@ -390,6 +395,9 @@ header { display: flex; align-items: center; justify-content: space-between; gap
     if (dir === 'fiches') return;
     document.querySelectorAll('.pill').forEach(p => p.setAttribute('aria-pressed', p.dataset.day === mode));
     $('legend').innerHTML = legendHTML();
+    $('stops').innerHTML = dir === 'aller'
+      ? 'Your stops near La Concorde: board at <b>Les Ehripis</b> for the 432 and 433, or at <b>Pirraparc</b> for the 353.'
+      : 'Get off near La Concorde: at <b>Les Ehripis</b> from the 432 and 433, or at <b>Pirraparc</b> from the 353.';
     $('tip').hidden = dir !== 'retour';
 
     if (now < START) {
@@ -397,7 +405,7 @@ header { display: flex; align-items: center; justify-content: space-between; gap
       $('banner').textContent = 'This 2027 timetable starts on 13 December 2026. Until then, some departures differ slightly.';
     } else $('banner').hidden = true;
 
-    $('next-title').textContent = dir === 'aller' ? 'Next departures to Crans-Montana' : 'Next departures to La Concorde';
+    $('next-title').textContent = dir === 'aller' ? 'Next departures to town' : 'Next departures to La Concorde';
     $('next').innerHTML = upcoming.length ? upcoming.map((r, i) => {
       const d = mins(r[1]) - nowM;
       const when = d === 0 ? '<b>now</b>' : d < 60 ? `in <b>${d} min</b>` : `in <b>${Math.floor(d / 60)} h ${pad(d % 60)}</b>`;
