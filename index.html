@@ -16,6 +16,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Semi+Condensed:wght@600;700;800&display=swap">
 <style>
+[hidden] { display: none !important; }
 /* Layout: application d'une colonne pour iPhone. Onglets Aller/Retour collants, prochains départs, puis grille heure par heure. */
 :root {
   --bg: #F3F6FA;
@@ -56,13 +57,14 @@ header { display: flex; align-items: center; justify-content: space-between; gap
 .season b { display: block; white-space: nowrap; font-family: var(--display); font-weight: 800; font-size: 24px; line-height: 1; color: var(--navy); }
 .season span { font-size: 12px; color: var(--mute); }
 
-.tabs { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; display: grid; grid-template-columns: 1fr 1fr .8fr; gap: 8px; padding-block: 6px; background: var(--bg); }
-.tab { appearance: none; border: 0; border-radius: 14px; padding: 12px 8px 10px; font-family: var(--display); font-weight: 800; font-size: 23px; letter-spacing: .02em; text-transform: uppercase; cursor: pointer; background: var(--surface); color: var(--mute); box-shadow: inset 0 0 0 1.5px var(--rule); }
+.tabs { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding-block: 6px; background: var(--bg); }
+.tab { appearance: none; border: 0; border-radius: 14px; padding: 12px 8px 10px; font-family: var(--display); font-weight: 800; font-size: 26px; letter-spacing: .03em; text-transform: uppercase; cursor: pointer; background: var(--surface); color: var(--mute); box-shadow: inset 0 0 0 1.5px var(--rule); }
 .tab small { display: block; white-space: nowrap; font-family: var(--body); font-weight: 500; font-size: 12px; letter-spacing: 0; text-transform: none; margin-top: 2px; }
 .tab[aria-selected="true"].aller { background: var(--sky); color: #fff; box-shadow: none; }
 .tab[aria-selected="true"].retour { background: var(--red); color: #fff; box-shadow: none; }
-.tab.fiches { font-size: 19px; }
-.tab[aria-selected="true"].fiches { background: var(--navy); color: var(--bg); box-shadow: none; }
+.more { appearance: none; border: 0; background: var(--surface); color: var(--navy); font: 600 15px var(--body); padding: 14px 16px; border-radius: 14px; box-shadow: inset 0 0 0 1.5px var(--rule); cursor: pointer; text-align: left; }
+.back { appearance: none; border: 0; align-self: flex-start; background: var(--navy); color: var(--bg); font: 600 15px var(--body); padding: 10px 16px; border-radius: 999px; cursor: pointer; }
+.more:focus-visible, .back:focus-visible { outline: 3px solid var(--navy); outline-offset: 2px; }
 #view-main { display: flex; flex-direction: column; gap: 14px; }
 #view-main[hidden] { display: none; }
 #view-fiches { display: flex; flex-direction: column; gap: 18px; }
@@ -133,9 +135,8 @@ header { display: flex; align-items: center; justify-content: space-between; gap
   </header>
 
   <div class="tabs" role="tablist">
-    <button class="tab aller" id="tab-aller" role="tab" aria-selected="true">Aller<small>vers Crans</small></button>
-    <button class="tab retour" id="tab-retour" role="tab" aria-selected="false">Retour<small>vers Concorde</small></button>
-    <button class="tab fiches" id="tab-fiches" role="tab" aria-selected="false">Fiches<small>complètes</small></button>
+    <button class="tab aller" id="tab-aller" role="tab" aria-selected="true">Aller<small>vers Crans-Montana</small></button>
+    <button class="tab retour" id="tab-retour" role="tab" aria-selected="false">Retour<small>vers La Concorde</small></button>
   </div>
 
   <div id="view-main">
@@ -164,9 +165,11 @@ header { display: flex; align-items: center; justify-content: space-between; gap
     <div><h3>Si tu pars depuis Télé Cry d'Er</h3><p><b>432</b> et <b>433</b> : 2 min plus tôt que l'heure indiquée.</p></div>
   </div>
 
+    <button class="more" id="open-fiches" type="button">Voir les fiches complètes, avec tous les arrêts</button>
   </div>
 
   <div id="view-fiches" hidden>
+    <button class="back" id="close-fiches" type="button">← Retour aux horaires</button>
     <p class="intro">Les fiches officielles 2027, avec toutes les courses et tous les arrêts. Écarte deux doigts pour zoomer.</p>
     <section class="fiche"><h2><span class="badge b432">432</span>Les Ehripis ⇄ Vermala Cervin</h2>
       <p>Aller en haut, retour en bas. La course de 18:45 s'arrête à Scandia.</p>
@@ -242,7 +245,7 @@ header { display: flex; align-items: center; justify-content: space-between; gap
   };
   const H = location.hash.slice(1);
   let dir = ['aller', 'retour', 'fiches'].includes(H) ? H : (store.get('dir') || 'aller');
-  if (!['aller', 'retour', 'fiches'].includes(dir)) dir = 'aller';
+  if (!['aller', 'retour'].includes(dir) && H !== 'fiches') dir = 'aller';
   let mode = 'auto';
 
   const $ = id => document.getElementById(id);
@@ -265,7 +268,7 @@ header { display: flex; align-items: center; justify-content: space-between; gap
     const nextKey = upcoming[0] ? upcoming[0][0] + upcoming[0][1] : '';
 
     document.body.classList.toggle('retour-on', dir === 'retour');
-    ['aller', 'retour', 'fiches'].forEach(k => $('tab-' + k).setAttribute('aria-selected', dir === k));
+    ['aller', 'retour'].forEach(k => $('tab-' + k).setAttribute('aria-selected', dir === k));
     $('view-main').hidden = dir === 'fiches';
     $('view-fiches').hidden = dir !== 'fiches';
     if (dir === 'fiches') return;
@@ -303,7 +306,9 @@ header { display: flex; align-items: center; justify-content: space-between; gap
 
   $('tab-aller').addEventListener('click', () => { dir = 'aller'; store.set('dir', dir); render(); });
   $('tab-retour').addEventListener('click', () => { dir = 'retour'; store.set('dir', dir); render(); });
-  $('tab-fiches').addEventListener('click', () => { dir = 'fiches'; store.set('dir', dir); render(); });
+  let lastDir = dir === 'fiches' ? 'aller' : dir;
+  $('open-fiches').addEventListener('click', () => { lastDir = dir; dir = 'fiches'; render(); window.scrollTo(0, 0); });
+  $('close-fiches').addEventListener('click', () => { dir = lastDir; render(); window.scrollTo(0, 0); });
   document.querySelectorAll('.pill').forEach(p => p.addEventListener('click', () => { mode = p.dataset.day; render(); }));
   render();
   setInterval(render, 30000);
