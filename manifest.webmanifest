@@ -1,6 +1,6 @@
 {
-  "name": "Bus La Concorde",
-  "short_name": "Bus Concorde",
+  "name": "La Concorde",
+  "short_name": "La Concorde",
   "lang": "fr",
   "start_url": "./",
   "display": "standalone",
