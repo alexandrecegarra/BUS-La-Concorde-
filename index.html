@@ -124,7 +124,7 @@ header { display: flex; align-items: center; justify-content: space-between; gap
 .banner { background: var(--surface); border-left: 4px solid var(--navy); border-radius: 10px; padding: 10px 12px; font-size: 14px; line-height: 1.4; }
 @media (min-width: 500px) { .chips { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 .wrap { padding-bottom: calc(90px + env(safe-area-inset-bottom, 0px)); }
-#sec-bus, #sec-pistes, #sec-contacts { display: flex; flex-direction: column; gap: 14px; }
+#sec-bus, #sec-pistes, #sec-restos, #sec-contacts { display: flex; flex-direction: column; gap: 14px; }
 .sec-title { margin: 4px 0 0; font-family: var(--display); font-weight: 800; font-size: 34px; color: var(--navy); }
 .card { background: var(--surface); border-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 10px; }
 .card h2 { margin: 0; font-family: var(--display); font-weight: 700; font-size: 22px; }
@@ -141,11 +141,26 @@ header { display: flex; align-items: center; justify-content: space-between; gap
 .clist { background: var(--surface); border-radius: 16px; overflow: hidden; }
 .crow { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 13px 16px; text-decoration: none; color: var(--fg); border-top: 1px solid var(--rule); }
 .crow:first-child { border-top: 0; }
+.hours { padding: 0 16px 14px; display: flex; flex-direction: column; gap: 4px; }
+.hours p { margin: 0; font-size: 14px; line-height: 1.45; color: var(--mute); }
+.hours b { color: var(--fg); font-weight: 600; margin-right: 4px; }
 .crow b { display: block; font-weight: 600; font-size: 16px; }
 .crow small { display: block; font-size: 13px; color: var(--mute); margin-top: 1px; }
 .crow .num { font-family: var(--display); font-weight: 700; font-size: 20px; color: var(--navy); white-space: nowrap; font-variant-numeric: tabular-nums; }
 .crow.sos .num { color: var(--red); font-size: 26px; }
-.bottom { position: fixed; left: 0; right: 0; bottom: 0; z-index: 20; display: grid; grid-template-columns: repeat(3, 1fr); background: var(--surface); box-shadow: 0 -1px 0 var(--rule); padding: 6px 8px calc(6px + env(safe-area-inset-bottom, 0px)); }
+.rintro { margin: 0; font-size: 16px; line-height: 1.55; }
+.rcat { margin: 10px 0 0; font-size: 13px; font-weight: 600; color: var(--mute); text-transform: uppercase; letter-spacing: .08em; }
+.resto { background: var(--surface); border-radius: 16px; padding: 14px 16px; display: flex; flex-direction: column; gap: 8px; }
+.rhead { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.resto h3 { margin: 0; font-family: var(--display); font-weight: 700; font-size: 22px; }
+.rtag { font-size: 12px; font-weight: 600; color: var(--navy); background: var(--tip); padding: 3px 9px; border-radius: 999px; white-space: nowrap; }
+.rtag.fav { color: #fff; background: var(--red); }
+.resto p { margin: 0; font-size: 15px; line-height: 1.5; color: var(--mute); }
+.ract { display: flex; gap: 8px; flex-wrap: wrap; }
+.rbtn { text-decoration: none; font: 600 15px var(--body); padding: 9px 14px; border-radius: 10px; color: var(--navy); background: var(--bg); box-shadow: inset 0 0 0 1.5px var(--rule); font-variant-numeric: tabular-nums; }
+.rbtn.call { color: #fff; background: var(--navy); box-shadow: none; }
+.rbtn:focus-visible { outline: 3px solid var(--navy); outline-offset: 2px; }
+.bottom { position: fixed; left: 0; right: 0; bottom: 0; z-index: 20; display: grid; grid-template-columns: repeat(4, 1fr); background: var(--surface); box-shadow: 0 -1px 0 var(--rule); padding: 6px 8px calc(6px + env(safe-area-inset-bottom, 0px)); }
 .nav { appearance: none; border: 0; background: none; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 6px 0; font: 600 12px var(--body); color: var(--mute); cursor: pointer; border-radius: 10px; }
 .nav svg { width: 26px; height: 26px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
 .nav[aria-current="page"] { color: var(--navy); }
@@ -240,19 +255,54 @@ header { display: flex; align-items: center; justify-content: space-between; gap
     </section>
   </div>
 
+  <div id="sec-restos" hidden>
+    <h1 class="sec-title">Restaurants</h1>
+    <p class="rintro">Voici notre petit guide des restaurants de Crans-Montana. Nous n&#x27;avons pas encore tout essayé, mais parmi les adresses testées, nos préférées pour le dîner sont le Bistrot des Ours, le Kaizen et Madriz. Nous ne sommes pas encore allés au Mont-Blanc ni chez Byakko, mais tous deux ont l&#x27;air excellents. Pour le déjeuner, nous choisirions Casy, La Plage ou Chetzeron, très agréable aussi en journée.</p>
+    <h2 class="rcat">Sur les pistes</h2>
+    <article class="resto"><div class="rhead"><h3>Chetzeron</h3></div><p>La table la plus raffinée du domaine, dans l&#x27;hôtel du même nom. Cuisine créative autour des produits locaux.</p><div class="ract"><a class="rbtn call" href="tel:+41274850808">027 485 08 08</a><a class="rbtn" href="https://www.chetzeron.ch" target="_blank" rel="noopener">Site</a></div></article>
+    <article class="resto"><div class="rhead"><h3>Cabane des Violettes</h3><span class="rtag fav">Coup de cœur</span></div><p>Une vraie cabane de montagne, tenue par Franck Reynaud et le guide Pierrot Bagnoud. Une cuisine simple et jamais banale.</p><div class="ract"><a class="rbtn call" href="tel:+41274813919">027 481 39 19</a><a class="rbtn" href="https://www.cabanedesviolettes.ch" target="_blank" rel="noopener">Site</a></div></article>
+    <article class="resto"><div class="rhead"><h3>Zerodix</h3></div><p>Le rendez-vous tendance du déjeuner, qui devient le cœur de l&#x27;après-ski à partir de 15 h.</p><div class="ract"><a class="rbtn call" href="tel:+41782203410">078 220 34 10</a><a class="rbtn" href="https://zerodix.ch/fr/" target="_blank" rel="noopener">Site</a></div></article>
+    <article class="resto"><div class="rhead"><h3>Le 2006</h3></div><p>Le restaurant Amadeus 2006, secteur Mont-Lachaux.</p><div class="ract"><a class="rbtn call" href="tel:+41786553389">078 655 33 89</a><a class="rbtn" href="http://amadeus2006.ch/" target="_blank" rel="noopener">Site</a></div></article>
+    <article class="resto"><div class="rhead"><h3>Le Loup Blanc</h3></div><div class="ract"><a class="rbtn call" href="tel:+41767249509">076 724 95 09</a></div></article>
+    <article class="resto"><div class="rhead"><h3>Chez Erwin</h3></div><p>Petit chalet sur la piste de Chetzeron, terrasse plein sud. Raclette, assiettes valaisannes et pâtisseries maison.</p><div class="ract"><a class="rbtn call" href="tel:+41794797809">079 479 78 09</a><a class="rbtn" href="https://www.facebook.com/p/Chez-Erwin-100063775563834/" target="_blank" rel="noopener">Site</a></div></article>
+    <article class="resto"><div class="rhead"><h3>Cabane des Taules</h3></div><p>Minuscule cabane au milieu des pistes. Raclette et soupe, seulement quand il fait beau.</p><div class="ract"><a class="rbtn call" href="tel:+41786478798">078 647 87 98</a></div></article>
+    <h2 class="rcat">Étoilés</h2>
+    <article class="resto"><div class="rhead"><h3>L&#x27;Ours</h3><span class="rtag">1 étoile Michelin</span></div><p>La table étoilée de Franck Reynaud à l&#x27;Hostellerie du Pas de l&#x27;Ours, 18/20 au Gault &amp; Millau. Cuisine précise, terroir alpin et touche provençale. Réserver longtemps à l&#x27;avance.</p><div class="ract"><a class="rbtn call" href="tel:+41274859333">027 485 93 33</a><a class="rbtn" href="https://www.pasdelours.ch" target="_blank" rel="noopener">Site</a></div></article>
+    <article class="resto"><div class="rhead"><h3>Le Mont-Blanc</h3><span class="rtag">1 étoile Michelin</span></div><p>L&#x27;autre table étoilée de la station, au LeCrans Hôtel &amp; Spa. Cuisine contemporaine et vue panoramique.</p><div class="ract"><a class="rbtn call" href="tel:+41274866088">027 486 60 88</a><a class="rbtn" href="https://www.lecrans.com" target="_blank" rel="noopener">Site</a></div></article>
+    <h2 class="rcat">Belles tables</h2>
+    <article class="resto"><div class="rhead"><h3>Le Bistrot des Ours</h3><span class="rtag fav">Coup de cœur</span></div><p>Le bistrot de Franck Reynaud, dans la même maison que L&#x27;Ours. Une cuisine fine et généreuse, aux racines provençales et aux produits locaux, dans un registre plus détendu mais sans rien céder sur la qualité.</p><div class="ract"><a class="rbtn call" href="tel:+41274859333">027 485 93 33</a><a class="rbtn" href="https://www.pasdelours.ch" target="_blank" rel="noopener">Site</a></div></article>
+    <article class="resto"><div class="rhead"><h3>Le Kaizen</h3><span class="rtag fav">Coup de cœur</span></div><p>Gastronomie japonaise, à trois minutes à pied de l&#x27;appartement. Chef Miguel de Vega, 13/20 au Gault &amp; Millau. Demandez le menu dégustation sur mesure.</p><div class="ract"><a class="rbtn call" href="tel:+41275653380">027 565 33 80</a><a class="rbtn" href="https://kaizenrestaurant.com" target="_blank" rel="noopener">Site</a></div></article>
+    <article class="resto"><div class="rhead"><h3>Le Partage</h3></div><p>À l&#x27;Aïda Hôtel &amp; Spa, dans l&#x27;univers de Franck Reynaud. Un menu de petites assiettes à partager. Le concept le plus original de la station.</p><div class="ract"><a class="rbtn call" href="tel:+41274854111">027 485 41 11</a><a class="rbtn" href="https://www.aidahotelspa.ch/fr/restaurant-bar.html" target="_blank" rel="noopener">Site</a></div></article>
+    <article class="resto"><div class="rhead"><h3>La Maison</h3></div><p>À la Résidence Le Miedzor, face au golf. Le chef Quentin Philippe, aussi aux commandes d&#x27;Arakel, une étoile à Genève. Une cuisine fine à partager, sans le cérémonial d&#x27;un étoilé.</p><div class="ract"><a class="rbtn call" href="tel:+41274812747">027 481 27 47</a><a class="rbtn" href="https://lamaisoncrans.ch" target="_blank" rel="noopener">Site</a></div></article>
+    <article class="resto"><div class="rhead"><h3>Casy</h3></div><p>Au centre de Montana, lignes épurées, 13/20 au Gault &amp; Millau. Une vraie pépite. Juste à côté, Easy by Casy pour l&#x27;apéritif, les tapas et les cocktails.</p><div class="ract"><a class="rbtn call" href="tel:+41274811718">027 481 17 18</a><a class="rbtn" href="https://www.casy-montana.ch" target="_blank" rel="noopener">Site</a></div></article>
+    <article class="resto"><div class="rhead"><h3>Le Monument</h3></div><p>Bistrot gourmand sur la place du village de Lens, 13/20 au Gault &amp; Millau. Chef Alessandro Bianchi, produits locaux, terrasse.</p><div class="ract"><a class="rbtn call" href="tel:+41274831982">027 483 19 82</a><a class="rbtn" href="https://www.lemonument-lens.com" target="_blank" rel="noopener">Site</a></div></article>
+    <article class="resto"><div class="rhead"><h3>Byakko</h3></div><p>Le restaurant japonais du Six Senses, en version fusion. Un cadre haut de gamme, tourné vers le bien-être.</p><div class="ract"><a class="rbtn call" href="tel:+41588062020">058 806 20 20</a><a class="rbtn" href="https://www.sixsenses.com/en/resorts/crans-montana" target="_blank" rel="noopener">Site</a></div></article>
+    <article class="resto"><div class="rhead"><h3>La Muña</h3></div><p>La table nippo-péruvienne du Crans Ambassador, 13/20 au Gault &amp; Millau. Style nikkei, ambiance lounge.</p><div class="ract"><a class="rbtn call" href="tel:+41274854848">027 485 48 48</a><a class="rbtn" href="https://www.cransambassador.ch" target="_blank" rel="noopener">Site</a></div></article>
+    <article class="resto"><div class="rhead"><h3>Five</h3></div><p>Cuisine libanaise au Guarda Golf Hôtel &amp; Résidences, retenue par le Guide Michelin.</p><div class="ract"><a class="rbtn call" href="tel:+41274862000">027 486 20 00</a><a class="rbtn" href="https://guardagolf.com/restaurants/" target="_blank" rel="noopener">Site</a></div></article>
+    <h2 class="rcat">Convivial et animé</h2>
+    <article class="resto"><div class="rhead"><h3>Madriz</h3><span class="rtag fav">Coup de cœur</span></div><p>L&#x27;adresse espagnole de la station. Tapas et ambiance animée.</p><div class="ract"><a class="rbtn call" href="tel:+41772699865">077 269 98 65</a><a class="rbtn" href="https://www.restaurantmadriz.com" target="_blank" rel="noopener">Site</a></div></article>
+    <article class="resto"><div class="rhead"><h3>La Plage</h3></div><p>Au bord du lac de la Moubra, on y dîne détendu en terrasse. L&#x27;adresse de l&#x27;été.</p><div class="ract"><a class="rbtn call" href="tel:+41274812787">027 481 27 87</a></div></article>
+    <article class="resto"><div class="rhead"><h3>Le Farinet</h3></div><p>Cuisine italienne et de saison, au centre de Crans.</p><div class="ract"><a class="rbtn call" href="tel:+41274854070">027 485 40 70</a><a class="rbtn" href="https://le-farinet.ch" target="_blank" rel="noopener">Site</a></div></article>
+    <article class="resto"><div class="rhead"><h3>Molino</h3></div><p>Pizzeria et trattoria italienne, rue du Pas de l&#x27;Ours.</p><div class="ract"><a class="rbtn call" href="tel:+41274819090">027 481 90 90</a><a class="rbtn" href="https://molino.ch" target="_blank" rel="noopener">Site</a></div></article>
+    <article class="resto"><div class="rhead"><h3>Edo</h3></div><p>Japonais et sushis, route cantonale à Montana.</p><div class="ract"><a class="rbtn call" href="tel:+41274817000">027 481 70 00</a><a class="rbtn" href="http://www.edo-tokyo.ch" target="_blank" rel="noopener">Site</a></div></article>
+    <p class="note">Numéros et sites relevés sur les sites des restaurants, MySwitzerland, le Guide Michelin et le plan des pistes officiel. Les horaires d’ouverture varient selon la saison : un appel avant de s’y rendre évite les surprises.</p>
+  </div>
+
   <div id="sec-contacts" hidden>
     <h1 class="sec-title">Contacts</h1>
     <p class="intro">Touche un numéro pour appeler.</p>
     <section class="cgroup"><h2>Urgences</h2><div class="clist"><a class="crow sos" href="tel:144"><span><b>Ambulance et secours</b><small>Urgence médicale, accident sur les pistes</small></span><span class="num">144</span></a><a class="crow sos" href="tel:1414"><span><b>Rega, hélicoptère</b><small>Sauvetage aérien</small></span><span class="num">1414</span></a><a class="crow sos" href="tel:117"><span><b>Police</b></span><span class="num">117</span></a><a class="crow sos" href="tel:118"><span><b>Pompiers</b></span><span class="num">118</span></a><a class="crow sos" href="tel:112"><span><b>Urgence européenne</b><small>Depuis un téléphone étranger</small></span><span class="num">112</span></a></div></section>
     <section class="cgroup"><h2>Santé</h2><div class="clist"><a class="crow" href="tel:+41274812371"><span><b>Centre médical de Crans</b></span><span class="num">027 481 23 71</span></a><a class="crow" href="tel:+41275646770"><span><b>Centre médical de Montana</b></span><span class="num">027 564 67 70</span></a><a class="crow" href="tel:+41800558143"><span><b>Pharmacie de garde</b><small>En dehors des heures d’ouverture</small></span><span class="num">0800 558 143</span></a><a class="crow" href="tel:+41274834300"><span><b>Pharmacie Benu, Lens</b></span><span class="num">027 483 43 00</span></a></div></section>
     <section class="cgroup"><h2>Station</h2><div class="clist"><a class="crow" href="tel:+41848221012"><span><b>Remontées mécaniques</b><small>Billetterie et informations</small></span><span class="num">0848 22 10 12</span></a><a class="crow" href="tel:+41274850404"><span><b>Crans-Montana Tourisme</b><small>Office du tourisme</small></span><span class="num">027 485 04 04</span></a><a class="crow" href="tel:+41274812348"><span><b>Bus SMC</b><small>Lignes 432 et 433</small></span><span class="num">027 481 23 48</span></a></div></section>
-    <p class="note">Sources : Commune de Crans-Montana (liste des urgences et médecins), plan des pistes officiel (novembre 2025), fiches horaires SMC.</p>
+    <section class="cgroup"><h2>Pratique</h2><div class="clist"><a class="crow" href="tel:+41274861950"><span><b>Déchetterie des Fougirs</b><small>Route de Chermignon, Lens. Service des déchetteries de la commune</small></span><span class="num">027 486 19 50</span></a><div class="hours"><p><b>Hiver</b> du lundi au samedi, 8 h à 12 h et 13 h 30 à 17 h</p><p><b>Été</b> du lundi au vendredi, 8 h à 12 h et 13 h 30 à 18 h ; samedi, 8 h à 12 h et 13 h 30 à 17 h</p><p>Accès uniquement avec la carte de déchetterie du ménage.</p></div></div></section>
+    <p class="note">Sources : Commune de Crans-Montana (urgences, médecins, déchetteries), plan des pistes officiel (novembre 2025), fiches horaires SMC.</p>
   </div>
 </div>
 
 <nav class="bottom" aria-label="Sections">
   <button class="nav" id="nav-bus" data-sec="bus" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="3" width="16" height="15" rx="3"/><path d="M4 11h16M8 18v3M16 18v3"/><circle cx="8" cy="14.5" r="1"/><circle cx="16" cy="14.5" r="1"/></svg>Bus</button>
   <button class="nav" id="nav-pistes" data-sec="pistes" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 20 9 7l4 6 3-4 6 11z"/><path d="m7.5 10 1.5 1.5L11 10"/></svg>Pistes</button>
+  <button class="nav" id="nav-restos" data-sec="restos" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3v8M4.5 3v5a2.5 2.5 0 0 0 5 0V3M7 11v10"/><path d="M17 21V3c-2.2 1-3.5 3.5-3.5 7v3H17"/></svg>Restos</button>
   <button class="nav" id="nav-contacts" data-sec="contacts" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3h4l2 5-2.5 1.5a11 11 0 0 0 6 6L16 13l5 2v4a2 2 0 0 1-2 2A17 17 0 0 1 3 5a2 2 0 0 1 2-2z"/></svg>Contacts</button>
 </nav>
 
@@ -377,7 +427,7 @@ header { display: flex; align-items: center; justify-content: space-between; gap
   $('open-fiches').addEventListener('click', () => { lastDir = dir; dir = 'fiches'; render(); window.scrollTo(0, 0); });
   $('close-fiches').addEventListener('click', () => { dir = lastDir; render(); window.scrollTo(0, 0); });
   document.querySelectorAll('.pill').forEach(p => p.addEventListener('click', () => { mode = p.dataset.day; render(); }));
-  const SECS = ['bus', 'pistes', 'contacts'];
+  const SECS = ['bus', 'pistes', 'restos', 'contacts'];
   let sec = SECS.includes(H) ? H : (H === 'aller' || H === 'retour' || H === 'fiches') ? 'bus' : (store.get('sec') || 'bus');
   if (!SECS.includes(sec)) sec = 'bus';
   function showSec(next) {
