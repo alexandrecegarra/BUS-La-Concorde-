@@ -17,7 +17,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Semi+Condensed:wght@600;700;800&display=swap">
 <style>
 [hidden] { display: none !important; }
-/* Layout: one-column iPhone app. Sticky Outbound/Return tabs, next departures, then an hour-by-hour grid. */
+/* Layout: one-column iPhone app. Sticky To Crans/Home tabs, next departures, then an hour-by-hour grid. */
 :root {
   --bg: #F3F6FA;
   --surface: #FFFFFF;
@@ -177,8 +177,8 @@ header { display: flex; align-items: center; justify-content: space-between; gap
 
   <div id="sec-bus">
   <div class="tabs" role="tablist">
-    <button class="tab aller" id="tab-aller" role="tab" aria-selected="true">Outbound<small>to Crans-Montana</small></button>
-    <button class="tab retour" id="tab-retour" role="tab" aria-selected="false">Return<small>to La Concorde</small></button>
+    <button class="tab aller" id="tab-aller" role="tab" aria-selected="true">To Crans<small>from La Concorde</small></button>
+    <button class="tab retour" id="tab-retour" role="tab" aria-selected="false">Home<small>back to La Concorde</small></button>
   </div>
 
   <div id="view-main">
@@ -214,7 +214,7 @@ header { display: flex; align-items: center; justify-content: space-between; gap
     <button class="back" id="close-fiches" type="button">← Back to departures</button>
     <p class="intro">The official 2027 timetables (in French), with every trip and every stop. Pinch to zoom.</p>
     <section class="fiche"><h2><span class="badge b432">432</span>Les Ehripis ⇄ Vermala Cervin</h2>
-      <p>Outbound at the top, return at the bottom. The 18:45 bus terminates at Scandia.</p>
+      <p>From Les Ehripis at the top, back to Les Ehripis at the bottom. The 18:45 bus terminates at Scandia.</p>
       <img loading="lazy" alt="432 timetable" src="fiches/432.jpg"></section>
     <section class="fiche"><h2><span class="badge b433">433</span>Les Ehripis ⇄ Centre Valaisan</h2>
       <p>To Les Ehripis at the top, from Les Ehripis at the bottom. The last departure from Les Ehripis, at 17:56, is on page 2.</p>
