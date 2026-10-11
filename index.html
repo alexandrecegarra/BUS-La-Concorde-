@@ -134,6 +134,7 @@ header { display: flex; align-items: center; justify-content: space-between; gap
 .card p { margin: 0; font-size: 15px; line-height: 1.45; color: var(--mute); }
 .live { border-radius: 12px; overflow: hidden; background: var(--bg); box-shadow: 0 0 0 1px var(--rule); }
 .live iframe { display: block; width: 100%; height: 62vh; min-height: 380px; border: 0; background: #fff; }
+.card .addr { color: var(--fg); font-size: 17px; line-height: 1.45; }
 .actions { display: flex; flex-direction: column; gap: 8px; }
 .btn { display: block; text-decoration: none; font: 600 15px var(--body); padding: 13px 14px; border-radius: 12px; color: var(--navy); background: var(--bg); box-shadow: inset 0 0 0 1.5px var(--rule); }
 .btn.primary { background: var(--sky); color: #fff; box-shadow: none; }
@@ -297,6 +298,11 @@ header { display: flex; align-items: center; justify-content: space-between; gap
 
   <div id="sec-contacts" hidden>
     <h1 class="sec-title">Contacts</h1>
+    <section class="card home">
+      <h2>La Concorde</h2>
+      <p class="addr">Route du Golf 28<br>3963 Crans-Montana, Valais</p>
+      <div class="actions"><a class="btn primary" href="https://www.google.com/maps/search/?api=1&amp;query=Route+du+Golf+28%2C+3963+Crans-Montana%2C+Switzerland" target="_blank" rel="noopener">Open in Google Maps</a></div>
+    </section>
     <p class="intro">Tap a number to call. Swiss numbers: from a foreign phone, replace the first 0 with +41.</p>
     <section class="cgroup"><h2>Emergencies</h2><div class="clist"><a class="crow sos" href="tel:144"><span><b>Ambulance and rescue</b><small>Medical emergency, accident on the slopes</small></span><span class="num">144</span></a><a class="crow sos" href="tel:1414"><span><b>Rega air rescue</b><small>Helicopter rescue</small></span><span class="num">1414</span></a><a class="crow sos" href="tel:117"><span><b>Police</b></span><span class="num">117</span></a><a class="crow sos" href="tel:118"><span><b>Fire brigade</b></span><span class="num">118</span></a><a class="crow sos" href="tel:112"><span><b>European emergency number</b><small>From a foreign mobile</small></span><span class="num">112</span></a></div></section>
     <section class="cgroup"><h2>Health</h2><div class="clist"><a class="crow" href="tel:+41274812371"><span><b>Crans medical centre</b></span><span class="num">027 481 23 71</span></a><a class="crow" href="tel:+41275646770"><span><b>Montana medical centre</b></span><span class="num">027 564 67 70</span></a><a class="crow" href="tel:+41775387043"><span><b>Osteopath, Manon Barras</b><small>Cabinet Harmonie, Rue Louis Antille 14, Montana. Online booking on OneDoc</small></span><span class="num">077 538 70 43</span></a><a class="crow" href="tel:+41800558143"><span><b>Pharmacy on duty</b><small>Outside opening hours</small></span><span class="num">0800 558 143</span></a><a class="crow" href="tel:+41274834300"><span><b>Benu pharmacy, Lens</b></span><span class="num">027 483 43 00</span></a></div></section>
