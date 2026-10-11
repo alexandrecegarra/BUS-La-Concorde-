@@ -1,0 +1,425 @@
+<title>La Concorde</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Semi+Condensed:wght@600;700;800&display=swap">
+<style>
+[hidden] { display: none !important; }
+/* Layout: one-column iPhone app. Sticky To town/Back home tabs, next departures, then an hour-by-hour grid. */
+:root {
+  --bg: #F3F6FA;
+  --surface: #FFFFFF;
+  --fg: #0D1B3A;
+  --mute: #5C6A84;
+  --rule: #DCE3EE;
+  --navy: #003087;
+  --sky: #00A3E0;
+  --red: #E4002B;
+  --c432: #E8001C; --c433: #A00020; --c353: #FFCC00; --on353: #1A1400;
+  --t432: #FDECEE; --t433: #F6E1E5; --t353: #FFF6CC;
+  --days: #7A5A00;
+  --past: .38;
+  --tip: #EAF2FB;
+  --display: "Barlow Semi Condensed", "Arial Narrow", system-ui, sans-serif;
+  --body: "Barlow", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0A1226; --surface: #121C34; --fg: #EEF2FA; --mute: #9AA8C3; --rule: #24314F;
+  --navy: #8FB3FF; --sky: #2DB8F0; --red: #FF2E4F;
+  --t432: #3A1219; --t433: #33121C; --t353: #3A3110; --days: #F5D36B; --tip: #16264A;
+  color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --bg: #0A1226; --surface: #121C34; --fg: #EEF2FA; --mute: #9AA8C3; --rule: #24314F;
+  --navy: #8FB3FF; --sky: #2DB8F0; --red: #FF2E4F;
+  --t432: #3A1219; --t433: #33121C; --t353: #3A3110; --days: #F5D36B; --tip: #16264A;
+  color-scheme: dark; }
+
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--fg); font-family: var(--body); font-size: 16px; -webkit-text-size-adjust: 100%; }
+.wrap { max-width: 560px; margin: 0 auto; padding-inline: 16px; padding-block: 12px 40px; display: flex; flex-direction: column; gap: 14px; }
+
+header { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.logo { background: #fff; border-radius: 10px; padding: 6px 8px; display: flex; }
+.logo img { height: 38px; width: auto; display: block; }
+.season { text-align: right; }
+.season b { display: block; white-space: nowrap; font-family: var(--display); font-weight: 800; font-size: 24px; line-height: 1; color: var(--navy); }
+.season span { font-size: 12px; color: var(--mute); }
+
+.tabs { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding-block: 6px; background: var(--bg); }
+.tab { appearance: none; border: 0; border-radius: 14px; padding: 12px 8px 10px; font-family: var(--display); font-weight: 800; font-size: 24px; letter-spacing: .01em; text-transform: uppercase; white-space: nowrap; cursor: pointer; background: var(--surface); color: var(--mute); box-shadow: inset 0 0 0 1.5px var(--rule); }
+.tab small { display: block; white-space: nowrap; font-family: var(--body); font-weight: 500; font-size: 12px; letter-spacing: 0; text-transform: none; margin-top: 2px; }
+.tab[aria-selected="true"].aller { background: var(--sky); color: #fff; box-shadow: none; }
+.tab[aria-selected="true"].retour { background: var(--red); color: #fff; box-shadow: none; }
+.more { appearance: none; border: 0; background: var(--surface); color: var(--navy); font: 600 15px var(--body); padding: 14px 16px; border-radius: 14px; box-shadow: inset 0 0 0 1.5px var(--rule); cursor: pointer; text-align: left; }
+.back { appearance: none; border: 0; align-self: flex-start; background: var(--navy); color: var(--bg); font: 600 15px var(--body); padding: 10px 16px; border-radius: 999px; cursor: pointer; }
+.more:focus-visible, .back:focus-visible { outline: 3px solid var(--navy); outline-offset: 2px; }
+#view-main { display: flex; flex-direction: column; gap: 14px; }
+#view-main[hidden] { display: none; }
+#view-fiches { display: flex; flex-direction: column; gap: 18px; }
+.intro { margin: 0; font-size: 15px; line-height: 1.45; color: var(--mute); }
+.fiche { display: flex; flex-direction: column; gap: 8px; }
+.fiche h2 { margin: 0; display: flex; align-items: center; gap: 10px; font-family: var(--display); font-weight: 700; font-size: 21px; }
+.fiche p { margin: 0; font-size: 14px; line-height: 1.45; color: var(--mute); }
+.fiche img { width: 100%; height: auto; display: block; background: #fff; border-radius: 10px; box-shadow: 0 0 0 1px var(--rule); }
+.tab:focus-visible, .pill:focus-visible { outline: 3px solid var(--navy); outline-offset: 2px; }
+
+.legend { display: grid; gap: 6px; }
+.lg { display: flex; align-items: center; gap: 10px; font-size: 14px; }
+.lg b { font-weight: 600; }
+.lg .m { color: var(--mute); }
+
+.badge { flex: none; display: inline-flex; align-items: center; justify-content: center; border-radius: 6px; font-family: var(--display); font-weight: 800; color: #fff; font-variant-numeric: tabular-nums; width: 40px; height: 26px; font-size: 16px; }
+.b432 { background: var(--c432); } .b433 { background: var(--c433); } .b353 { background: var(--c353); color: var(--on353); }
+
+.next { background: var(--surface); border-radius: 16px; padding: 14px; display: grid; gap: 10px; box-shadow: 0 1px 0 var(--rule); }
+.next h2 { margin: 0; font-size: 13px; font-weight: 600; color: var(--mute); text-transform: uppercase; letter-spacing: .08em; }
+.nrow { display: flex; align-items: center; gap: 12px; }
+.nrow .badge { width: 48px; height: 34px; font-size: 19px; }
+.nrow .t { font-family: var(--display); font-weight: 800; font-size: 34px; line-height: 1; font-variant-numeric: tabular-nums; }
+.nrow .w { margin-left: auto; text-align: right; font-size: 13px; color: var(--mute); }
+.nrow .w b { font-size: 18px; color: var(--fg); font-weight: 700; }
+.nrow .w .st { display: block; }
+.nrow.first .t { font-size: 40px; }
+.empty { color: var(--mute); font-size: 14px; }
+
+.pills { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 2px; }
+.pill { appearance: none; border: 0; flex: 1 0 auto; border-radius: 999px; padding: 8px 12px; font: 600 14px var(--body); background: var(--surface); color: var(--fg); box-shadow: inset 0 0 0 1.5px var(--rule); cursor: pointer; }
+.pill[aria-pressed="true"] { background: var(--navy); color: var(--bg); box-shadow: none; }
+
+.grid { background: var(--surface); border-radius: 16px; overflow: hidden; }
+.hr { display: grid; grid-template-columns: 52px 1fr; align-items: start; gap: 8px; padding: 10px 10px 10px 12px; border-top: 1px solid var(--rule); }
+.hr:first-child { border-top: 0; }
+.hr.now { background: color-mix(in srgb, var(--navy) 7%, transparent); }
+.hh { font-family: var(--display); font-weight: 800; font-size: 28px; color: var(--navy); line-height: 1.15; font-variant-numeric: tabular-nums; }
+.hh i { font-style: normal; font-size: 15px; color: var(--accent, var(--sky)); margin-left: 1px; }
+.retour-on .hh i { color: var(--red); }
+.chips { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; min-width: 0; }
+.chip { display: flex; align-items: center; gap: 7px; border-radius: 10px; padding: 6px 6px; min-width: 0; }
+.chip.l432 { background: var(--t432); } .chip.l433 { background: var(--t433); } .chip.l353 { background: var(--t353); }
+.chip .badge { width: 34px; height: 24px; font-size: 14px; }
+.chip .t { font-family: var(--display); font-weight: 700; font-size: 22px; line-height: 1; font-variant-numeric: tabular-nums; }
+.chip .s { font-size: 11px; color: var(--mute); line-height: 1.2; margin-top: 2px; }
+.chip .d { display: block; font-weight: 700; color: var(--days); }
+.chip.past { opacity: var(--past); }
+.chip.isnext { box-shadow: inset 0 0 0 2px var(--navy); }
+.nobus { color: var(--mute); font-size: 13px; padding-top: 8px; }
+
+.tip { background: var(--tip); border-radius: 14px; padding: 12px 14px; display: grid; gap: 10px; }
+.tip h3 { margin: 0 0 2px; font-family: var(--display); font-weight: 700; font-size: 19px; color: var(--navy); }
+.tip p { margin: 0; font-size: 15px; line-height: 1.4; }
+
+.note { font-size: 12px; color: var(--mute); line-height: 1.5; }
+.stops { margin: 0; background: var(--surface); border-radius: 14px; padding: 12px 14px; font-size: 15px; line-height: 1.45; }
+.stops b { color: var(--navy); }
+.banner { background: var(--surface); border-left: 4px solid var(--navy); border-radius: 10px; padding: 10px 12px; font-size: 14px; line-height: 1.4; }
+@media (max-width: 350px) { .tab { font-size: 20px; } .tab small { font-size: 11px; } }
+@media (min-width: 500px) { .chips { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.wrap { padding-bottom: calc(90px + env(safe-area-inset-bottom, 0px)); }
+#sec-bus, #sec-pistes, #sec-restos, #sec-contacts { display: flex; flex-direction: column; gap: 14px; }
+.sec-title { margin: 4px 0 0; font-family: var(--display); font-weight: 800; font-size: 34px; color: var(--navy); }
+.card { background: var(--surface); border-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 10px; }
+.card h2 { margin: 0; font-family: var(--display); font-weight: 700; font-size: 22px; }
+.card p { margin: 0; font-size: 15px; line-height: 1.45; color: var(--mute); }
+.live { border-radius: 12px; overflow: hidden; background: var(--bg); box-shadow: 0 0 0 1px var(--rule); }
+.live iframe { display: block; width: 100%; height: 62vh; min-height: 380px; border: 0; background: #fff; }
+.card .addr { color: var(--fg); font-size: 17px; line-height: 1.45; }
+.actions { display: flex; flex-direction: column; gap: 8px; }
+.btn { display: block; text-decoration: none; font: 600 15px var(--body); padding: 13px 14px; border-radius: 12px; color: var(--navy); background: var(--bg); box-shadow: inset 0 0 0 1.5px var(--rule); }
+.btn.primary { background: var(--sky); color: #fff; box-shadow: none; }
+.btn:focus-visible, .nav:focus-visible, .tel:focus-visible, .crow:focus-visible { outline: 3px solid var(--navy); outline-offset: 2px; }
+.tel { color: var(--navy); font-weight: 700; white-space: nowrap; }
+.cgroup { display: flex; flex-direction: column; gap: 6px; }
+.cgroup h2 { margin: 6px 0 2px; font-size: 13px; font-weight: 600; color: var(--mute); text-transform: uppercase; letter-spacing: .08em; }
+.clist { background: var(--surface); border-radius: 16px; overflow: hidden; }
+.crow { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 13px 16px; text-decoration: none; color: var(--fg); border-top: 1px solid var(--rule); }
+.crow:first-child { border-top: 0; }
+.hours { padding: 0 16px 14px; display: flex; flex-direction: column; gap: 4px; }
+.hours p { margin: 0; font-size: 14px; line-height: 1.45; color: var(--mute); }
+.hours b { color: var(--fg); font-weight: 600; margin-right: 4px; }
+.crow b { display: block; font-weight: 600; font-size: 16px; }
+.crow small { display: block; font-size: 13px; color: var(--mute); margin-top: 1px; }
+.crow .num { font-family: var(--display); font-weight: 700; font-size: 20px; color: var(--navy); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.crow.sos .num { color: var(--red); font-size: 26px; }
+.rintro { margin: 0; font-size: 16px; line-height: 1.55; }
+.rcat { margin: 10px 0 0; font-size: 13px; font-weight: 600; color: var(--mute); text-transform: uppercase; letter-spacing: .08em; }
+.resto { background: var(--surface); border-radius: 16px; padding: 14px 16px; display: flex; flex-direction: column; gap: 8px; }
+.rhead { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.resto h3 { margin: 0; font-family: var(--display); font-weight: 700; font-size: 22px; }
+.tags { display: flex; gap: 6px; flex-wrap: wrap; }
+.rtag { font-size: 12px; font-weight: 600; color: var(--navy); background: var(--tip); padding: 3px 9px; border-radius: 999px; white-space: nowrap; }
+.rtag.fav { color: #fff; background: var(--red); }
+.resto p { margin: 0; font-size: 15px; line-height: 1.5; color: var(--mute); }
+.ract { display: flex; gap: 8px; flex-wrap: wrap; }
+.rbtn { text-decoration: none; font: 600 15px var(--body); padding: 9px 14px; border-radius: 10px; color: var(--navy); background: var(--bg); box-shadow: inset 0 0 0 1.5px var(--rule); font-variant-numeric: tabular-nums; }
+.rbtn.call { color: #fff; background: var(--navy); box-shadow: none; }
+.rbtn:focus-visible { outline: 3px solid var(--navy); outline-offset: 2px; }
+.bottom { position: fixed; left: 0; right: 0; bottom: 0; z-index: 20; display: grid; grid-template-columns: repeat(4, 1fr); background: var(--surface); box-shadow: 0 -1px 0 var(--rule); padding: 6px 8px calc(6px + env(safe-area-inset-bottom, 0px)); }
+.nav { appearance: none; border: 0; background: none; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 6px 0; font: 600 12px var(--body); color: var(--mute); cursor: pointer; border-radius: 10px; }
+.nav svg { width: 26px; height: 26px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.nav[aria-current="page"] { color: var(--navy); }
+@media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
+</style>
+
+<div class="wrap" id="app">
+  <header>
+    <div class="logo"><img alt="Crans-Montana 2027" src="data:image/png;base64,__LOGO__"></div>
+    <div class="season"><b>La Concorde</b><span>Crans-Montana · 2027 season</span></div>
+  </header>
+
+  <div id="sec-bus">
+  <div class="tabs" role="tablist">
+    <button class="tab aller" id="tab-aller" role="tab" aria-selected="true">To town<small>from La Concorde</small></button>
+    <button class="tab retour" id="tab-retour" role="tab" aria-selected="false">Back home<small>to La Concorde</small></button>
+  </div>
+
+  <div id="view-main">
+
+  <p class="stops" id="stops"></p>
+
+  <div class="banner" id="banner" hidden></div>
+
+  <section class="next" aria-live="polite">
+    <h2 id="next-title">Next departures</h2>
+    <div id="next"></div>
+  </section>
+
+  <div class="legend" id="legend"></div>
+
+  <div class="pills" role="group" aria-label="Day">
+    <button class="pill" data-day="auto" id="d-auto">Today</button>
+    <button class="pill" data-day="lv" id="d-lv">Mon–Fri</button>
+    <button class="pill" data-day="sam" id="d-sam">Sat</button>
+    <button class="pill" data-day="dim" id="d-dim">Sun</button>
+    <button class="pill" data-day="all" id="d-all">All</button>
+  </div>
+
+  <div class="grid" id="grid"></div>
+
+  <div class="tip" id="tip" hidden>
+    <div><h3>Leaving from Ycoor</h3><p><b>433</b> at Ycoor: 5 min earlier. <b>432</b> at Télé Arnouva: 6 min earlier.</p></div>
+    <div><h3>Leaving from Télé Cry d'Er</h3><p><b>432</b> and <b>433</b>: 2 min earlier than the time shown.</p></div>
+  </div>
+
+    <button class="more" id="open-fiches" type="button">See the full timetables, with every stop</button>
+  </div>
+
+  <div id="view-fiches" hidden>
+    <button class="back" id="close-fiches" type="button">← Back to departures</button>
+    <p class="intro">The official 2027 timetables (in French), with every trip and every stop. Pinch to zoom.</p>
+    <section class="fiche"><h2><span class="badge b432">432</span>Les Ehripis ⇄ Vermala Cervin</h2>
+      <p>From Les Ehripis at the top, back to Les Ehripis at the bottom. The 18:45 bus terminates at Scandia.</p>
+      <img loading="lazy" alt="432 timetable" src="__IMG_432__"></section>
+    <section class="fiche"><h2><span class="badge b433">433</span>Les Ehripis ⇄ Centre Valaisan</h2>
+      <p>To Les Ehripis at the top, from Les Ehripis at the bottom. The last departure from Les Ehripis, at 17:56, is on page 2.</p>
+      <img loading="lazy" alt="433 timetable, page 1" src="__IMG_433-1__">
+      <img loading="lazy" alt="433 timetable, page 2" src="__IMG_433-2__"></section>
+    <section class="fiche"><h2><span class="badge b353">353</span>PostBus Sion ⇄ Crans-Montana</h2>
+      <p>Pages 1 and 3: towards Crans-Montana. Pages 2 and 4: towards Sion. Pirraparc has no column of its own: add 5 min to the Lens, Centre d'art time. The small numbered squares refer to the operating periods listed at the bottom of pages 1 and 2.</p>
+      <img loading="lazy" alt="353 timetable, page 1" src="__IMG_353-1__">
+      <img loading="lazy" alt="353 timetable, page 2" src="__IMG_353-2__">
+      <img loading="lazy" alt="353 timetable, page 3" src="__IMG_353-3__">
+      <img loading="lazy" alt="353 timetable, page 4" src="__IMG_353-4__"></section>
+  </div>
+
+  <p class="note">2027 timetables, valid from 13 December 2026 to 11 December 2027. Lines 432 and 433 run every day. On public holidays the 353 (PostBus) follows the Sunday timetable. Sources: SMC 12.432 and 12.433 (as of 31.07.2026), PostBus 12.353 (as of 28.08.2026). Times not guaranteed in heavy traffic or bad weather.</p>
+  </div>
+
+  <div id="sec-pistes" hidden>
+    <h1 class="sec-title">Slopes</h1>
+    <section class="card">
+      <h2>Live slopes and lifts</h2>
+      <p>The official map shows which slopes and lifts are open or closed, in real time.</p>
+      <div class="live" id="live"></div>
+      <div class="actions">
+        <a class="btn primary" href="https://www.infosnow.ch/~apgmontagne/?id=141&amp;tab=map-wi2&amp;lang=en" target="_blank" rel="noopener">Open the live map full screen</a>
+        <a class="btn" href="https://www.crans-montana.ch/fr/etat_des_pistes_et_installations" target="_blank" rel="noopener">Detailed status: lifts, slopes, avalanche risk</a>
+      </div>
+    </section>
+    <section class="card">
+      <h2>Piste map</h2>
+      <p>The official Crans-Montana piste map, with the mountain restaurants and their numbers. November 2025 edition.</p>
+      <div class="actions">
+        <a class="btn primary" href="https://www.crans-montana.ch/img_up/DOCNONPUB/a32e24eaae168cf7ecf9136b1f450ace.CMTC_PlanPistes_2026_compressed.pdf" target="_blank" rel="noopener">Open the piste map</a>
+      </div>
+    </section>
+    <section class="card">
+      <h2>Ski lifts</h2>
+      <p>Tickets and information: <a class="tel" href="tel:+41848221012">0848 22 10 12</a></p>
+    </section>
+  </div>
+
+  <div id="sec-restos" hidden>
+    <h1 class="sec-title">Restaurants</h1>
+    __RESTOS__
+  </div>
+
+  <div id="sec-contacts" hidden>
+    <h1 class="sec-title">Contacts</h1>
+    <section class="card home">
+      <h2>La Concorde</h2>
+      <p class="addr">Route du Golf 28<br>3963 Crans VS</p>
+      <div class="actions"><a class="btn primary" href="https://www.google.com/maps/search/?api=1&amp;query=Route+du+Golf+28%2C+3963+Crans+VS%2C+Switzerland" target="_blank" rel="noopener">Open in Google Maps</a></div>
+    </section>
+    <p class="intro">Tap a number to call. Swiss numbers: from a foreign phone, replace the first 0 with +41.</p>
+    <section class="cgroup"><h2>Emergencies</h2><div class="clist"><a class="crow sos" href="tel:144"><span><b>Ambulance and rescue</b><small>Medical emergency, accident on the slopes</small></span><span class="num">144</span></a><a class="crow sos" href="tel:1414"><span><b>Rega air rescue</b><small>Helicopter rescue</small></span><span class="num">1414</span></a><a class="crow sos" href="tel:117"><span><b>Police</b></span><span class="num">117</span></a><a class="crow sos" href="tel:118"><span><b>Fire brigade</b></span><span class="num">118</span></a><a class="crow sos" href="tel:112"><span><b>European emergency number</b><small>From a foreign mobile</small></span><span class="num">112</span></a></div></section>
+    <section class="cgroup"><h2>Health</h2><div class="clist"><a class="crow" href="tel:+41274812371"><span><b>Crans medical centre</b></span><span class="num">027 481 23 71</span></a><a class="crow" href="tel:+41275646770"><span><b>Montana medical centre</b></span><span class="num">027 564 67 70</span></a><a class="crow" href="tel:+41775387043"><span><b>Osteopath, Manon Barras</b><small>Cabinet Harmonie, Rue Louis Antille 14, Montana. Online booking on OneDoc</small></span><span class="num">077 538 70 43</span></a><a class="crow" href="tel:+41800558143"><span><b>Pharmacy on duty</b><small>Outside opening hours</small></span><span class="num">0800 558 143</span></a><a class="crow" href="tel:+41274834300"><span><b>Benu pharmacy, Lens</b></span><span class="num">027 483 43 00</span></a></div></section>
+    <section class="cgroup"><h2>Resort</h2><div class="clist"><a class="crow" href="tel:+41848221012"><span><b>Ski lifts</b><small>Tickets and information</small></span><span class="num">0848 22 10 12</span></a><a class="crow" href="tel:+41274850404"><span><b>Crans-Montana Tourism</b><small>Tourist office</small></span><span class="num">027 485 04 04</span></a><a class="crow" href="tel:+41274812348"><span><b>SMC buses</b><small>Lines 432 and 433</small></span><span class="num">027 481 23 48</span></a></div></section>
+    <section class="cgroup"><h2>Practical</h2><div class="clist"><a class="crow" href="tel:+41797504006"><span><b>Ski lockers, Cry d'Er</b><small>Crans. White Partridge Sàrl</small></span><span class="num">079 750 40 06</span></a><a class="crow" href="tel:+41274861950"><span><b>Les Fougirs recycling centre</b><small>Route de Chermignon, Lens. Municipal waste service</small></span><span class="num">027 486 19 50</span></a><div class="hours"><p><b>Winter</b> Monday to Saturday, 8:00–12:00 and 13:30–17:00</p><p><b>Summer</b> Monday to Friday, 8:00–12:00 and 13:30–18:00; Saturday, 8:00–12:00 and 13:30–17:00</p><p>Access only with the household's recycling card.</p></div></div></section>
+    <p class="note">Sources: Commune de Crans-Montana (emergencies, doctors, recycling centres), official piste map (November 2025), SMC timetables.</p>
+  </div>
+</div>
+
+<nav class="bottom" aria-label="Sections">
+  <button class="nav" id="nav-bus" data-sec="bus" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="3" width="16" height="15" rx="3"/><path d="M4 11h16M8 18v3M16 18v3"/><circle cx="8" cy="14.5" r="1"/><circle cx="16" cy="14.5" r="1"/></svg>Bus</button>
+  <button class="nav" id="nav-pistes" data-sec="pistes" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 20 9 7l4 6 3-4 6 11z"/><path d="m7.5 10 1.5 1.5L11 10"/></svg>Slopes</button>
+  <button class="nav" id="nav-restos" data-sec="restos" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3v8M4.5 3v5a2.5 2.5 0 0 0 5 0V3M7 11v10"/><path d="M17 21V3c-2.2 1-3.5 3.5-3.5 7v3H17"/></svg>Eat</button>
+  <button class="nav" id="nav-contacts" data-sec="contacts" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3h4l2 5-2.5 1.5a11 11 0 0 0 6 6L16 13l5 2v4a2 2 0 0 1-2 2A17 17 0 0 1 3 5a2 2 0 0 1 2-2z"/></svg>Contacts</button>
+</nav>
+
+<script>
+(function () {
+  // jours : '' tous, lv, ls (lun–sam), sam, dim, sd (sam–dim), mer, lvsm (lun–ven sauf mer)
+  const L = (line, list, stop) => list.map(x => Array.isArray(x) ? [line, x[0], stop, x[1]] : [line, x, stop, '']);
+  const ALLER = [
+    ...L(432, ['08:15','09:00','09:45','10:30','11:15','12:00','12:45','13:30','14:15','15:00','15:45','16:30','17:15','18:00'], 'Les Ehripis'),
+    [432, '18:45', 'to Scandia only', ''],
+    ...L(433, ['08:11','08:56','09:41','10:26','11:11','11:56','12:41','13:26','14:11','14:56','15:41','16:26','17:11','17:56'], 'Les Ehripis'),
+    ...L(353, ['08:43',['09:43','lv'],['09:50','sam'],['10:43','lv'],['10:48','sd'],['11:43','ls'],['12:24','lv'],'12:43',
+      ['13:14','lvsm'],['13:24','mer'],['13:43','lv'],'14:43','15:43','16:43',['17:32','lv'],'17:43',
+      ['18:43','ls'],['18:48','dim'],['19:43','lv'],['19:58','sd'],'20:48','21:43'], 'Pirraparc'),
+  ];
+  const RETOUR = [
+    ...L(432, ['08:02','08:47','09:32','10:17','11:02','11:47','12:32','13:17','14:02','14:47','15:32','16:17','17:02','17:47'], 'Grand-Place'),
+    ...L(433, ['08:07','08:52','09:37','10:22','11:07','11:52','12:37','13:22','14:07','14:52','15:37','16:22','17:07','17:52','18:37'], 'Mérignou'),
+    ...L(353, ['09:05',['10:05','ls'],'11:05',['11:40','lv'],['12:05','ls'],['12:32','lv'],'13:00',['14:05','lv'],
+      '15:05','16:12','17:05',['18:03','sd'],['18:05','lv'],'19:05','20:05','21:05'], 'Mérignou'),
+  ];
+  const LABEL = { lv: 'Mon–Fri', ls: 'Mon–Sat', sam: 'Sat', dim: 'Sun', sd: 'Sat–Sun', mer: 'Wed', lvsm: 'Mon–Fri exc. Wed' };
+  // Jours où le 353 suit l'horaire du dimanche (fiche CarPostal 2027)
+  const SUNLIKE = ['2026-12-25','2026-12-26','2027-01-01','2027-01-02','2027-03-19','2027-03-29','2027-05-06','2027-05-17','2027-05-27','2027-08-01','2027-11-01','2027-12-08'];
+  const START = new Date(2026, 11, 13);
+
+  const pad = n => String(n).padStart(2, '0');
+  const iso = d => d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+  const mins = t => +t.slice(0, 2) * 60 + +t.slice(3);
+
+  // Type de jour : 1..5 = lun..ven, 6 = sam, 0 = dim/férié
+  function dayType(d) { return SUNLIKE.includes(iso(d)) ? 0 : d.getDay(); }
+  function runs(code, dow) {
+    if (!code) return true;
+    switch (code) {
+      case 'lv': return dow >= 1 && dow <= 5;
+      case 'ls': return dow >= 1 && dow <= 6;
+      case 'sam': return dow === 6;
+      case 'dim': return dow === 0;
+      case 'sd': return dow === 0 || dow === 6;
+      case 'mer': return dow === 3;
+      case 'lvsm': return [1, 2, 4, 5].includes(dow);
+    }
+    return true;
+  }
+  function visible(code, mode, dow) {
+    if (mode === 'all') return true;
+    if (mode === 'auto') return runs(code, dow);
+    if (mode === 'lv') return !code || ['lv', 'ls', 'mer', 'lvsm'].includes(code);
+    if (mode === 'sam') return runs(code, 6);
+    if (mode === 'dim') return runs(code, 0);
+  }
+
+  const store = {
+    get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
+    set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} },
+  };
+  const H = location.hash.slice(1);
+  let dir = ['aller', 'retour', 'fiches'].includes(H) ? H : (store.get('dir') || 'aller');
+  if (!['aller', 'retour'].includes(dir) && H !== 'fiches') dir = 'aller';
+  let mode = 'auto';
+
+  const $ = id => document.getElementById(id);
+
+  function legendHTML() {
+    const items = dir === 'aller'
+      ? [[432, 'Les Ehripis → Vermala', 'via Télé Cry d’Er'], [433, 'Les Ehripis → Centre Valaisan', 'via Télé Cry d’Er and Ycoor'], [353, 'PostBus to Crans-Montana', 'board at Pirraparc']]
+      : [[432, 'Vermala → Les Ehripis', 'board at Grand-Place'], [433, 'Centre Valaisan → Les Ehripis', 'board at Mérignou'], [353, 'PostBus to Lens', 'board at Mérignou, get off at Pirraparc']];
+    return items.map(([l, a, b]) => `<div class="lg"><span class="badge b${l}">${l}</span><div><b>${a}</b> <span class="m">${b}</span></div></div>`).join('');
+  }
+
+  function render() {
+    const now = new Date();
+    const dow = dayType(now);
+    const nowM = now.getHours() * 60 + now.getMinutes();
+    const isToday = mode === 'auto';
+    const rows = (dir === 'aller' ? ALLER : RETOUR).slice().sort((a, b) => mins(a[1]) - mins(b[1]) || a[0] - b[0]);
+    const shown = rows.filter(r => visible(r[3], mode, dow));
+    const upcoming = rows.filter(r => runs(r[3], dow) && mins(r[1]) >= nowM).slice(0, 3);
+    const nextKey = upcoming[0] ? upcoming[0][0] + upcoming[0][1] : '';
+
+    document.body.classList.toggle('retour-on', dir === 'retour');
+    ['aller', 'retour'].forEach(k => $('tab-' + k).setAttribute('aria-selected', dir === k));
+    $('view-main').hidden = dir === 'fiches';
+    $('view-fiches').hidden = dir !== 'fiches';
+    if (dir === 'fiches') return;
+    document.querySelectorAll('.pill').forEach(p => p.setAttribute('aria-pressed', p.dataset.day === mode));
+    $('legend').innerHTML = legendHTML();
+    $('stops').innerHTML = dir === 'aller'
+      ? 'Your stops near La Concorde: board at <b>Les Ehripis</b> for the 432 and 433, or at <b>Pirraparc</b> for the 353.'
+      : 'Get off near La Concorde: at <b>Les Ehripis</b> from the 432 and 433, or at <b>Pirraparc</b> from the 353.';
+    $('tip').hidden = dir !== 'retour';
+
+    if (now < START) {
+      $('banner').hidden = false;
+      $('banner').textContent = 'This 2027 timetable starts on 13 December 2026. Until then, some departures differ slightly.';
+    } else $('banner').hidden = true;
+
+    $('next-title').textContent = dir === 'aller' ? 'Next departures to town' : 'Next departures to La Concorde';
+    $('next').innerHTML = upcoming.length ? upcoming.map((r, i) => {
+      const d = mins(r[1]) - nowM;
+      const when = d === 0 ? '<b>now</b>' : d < 60 ? `in <b>${d} min</b>` : `in <b>${Math.floor(d / 60)} h ${pad(d % 60)}</b>`;
+      return `<div class="nrow${i === 0 ? ' first' : ''}"><span class="badge b${r[0]}">${r[0]}</span><span class="t">${r[1]}</span><span class="w">${when}<span class="st">${r[2]}</span></span></div>`;
+    }).join('') : `<p class="empty">No more departures today. First departure tomorrow around 8:00.</p>`;
+
+    let html = '';
+    for (let h = 8; h <= 21; h++) {
+      const hr = shown.filter(r => +r[1].slice(0, 2) === h);
+      const cur = isToday && now.getHours() === h;
+      const chips = hr.map(r => {
+        const past = isToday && mins(r[1]) < nowM;
+        const nx = isToday && (r[0] + r[1]) === nextKey;
+        const sub = (dir === 'retour' || r[2].startsWith('to Scandia')) ? r[2] : '';
+        const days = r[3] && (mode === 'all' || mode === 'lv') ? `<span class="d">${LABEL[r[3]]}</span>` : '';
+        return `<div class="chip l${r[0]}${past ? ' past' : ''}${nx ? ' isnext' : ''}"><span class="badge b${r[0]}">${r[0]}</span><div style="min-width:0"><div class="t">${r[1]}</div>${sub || days ? `<div class="s">${sub}${days}</div>` : ''}</div></div>`;
+      }).join('');
+      html += `<div class="hr${cur ? ' now' : ''}" id="h${h}"><div class="hh">${pad(h)}<i>h</i></div><div class="chips">${chips || '<span class="nobus">No departures</span>'}</div></div>`;
+    }
+    $('grid').innerHTML = html;
+  }
+
+  $('tab-aller').addEventListener('click', () => { dir = 'aller'; store.set('dir', dir); render(); });
+  $('tab-retour').addEventListener('click', () => { dir = 'retour'; store.set('dir', dir); render(); });
+  let lastDir = dir === 'fiches' ? 'aller' : dir;
+  $('open-fiches').addEventListener('click', () => { lastDir = dir; dir = 'fiches'; render(); window.scrollTo(0, 0); });
+  $('close-fiches').addEventListener('click', () => { dir = lastDir; render(); window.scrollTo(0, 0); });
+  document.querySelectorAll('.pill').forEach(p => p.addEventListener('click', () => { mode = p.dataset.day; render(); }));
+  const SECS = ['bus', 'pistes', 'restos', 'contacts'];
+  let sec = SECS.includes(H) ? H : (H === 'aller' || H === 'retour' || H === 'fiches') ? 'bus' : (store.get('sec') || 'bus');
+  if (!SECS.includes(sec)) sec = 'bus';
+  function showSec(next) {
+    sec = next; store.set('sec', sec);
+    SECS.forEach(k => {
+      $('sec-' + k).hidden = k !== sec;
+      if (k === sec) $('nav-' + k).setAttribute('aria-current', 'page'); else $('nav-' + k).removeAttribute('aria-current');
+    });
+    if (sec === 'pistes' && !$('live').firstChild) {
+      const f = document.createElement('iframe');
+      f.src = 'https://www.infosnow.ch/~apgmontagne/?id=141&tab=map-wi2&lang=en';
+      f.title = 'Crans-Montana slopes and lifts, live';
+      f.loading = 'lazy';
+      $('live').appendChild(f);
+    }
+    if (sec === 'bus') render();
+    window.scrollTo(0, 0);
+  }
+  document.querySelectorAll('.nav').forEach(n => n.addEventListener('click', () => showSec(n.dataset.sec)));
+  showSec(sec);
+  setInterval(() => { if (sec === 'bus') render(); }, 30000);
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) render(); });
+})();
+</script>

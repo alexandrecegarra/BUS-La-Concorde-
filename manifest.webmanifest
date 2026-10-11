@@ -1,7 +1,7 @@
 {
   "name": "La Concorde",
   "short_name": "La Concorde",
-  "lang": "fr",
+  "lang": "en",
   "start_url": "./",
   "display": "standalone",
   "background_color": "#F3F6FA",
