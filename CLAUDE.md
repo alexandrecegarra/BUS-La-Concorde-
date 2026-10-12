@@ -31,6 +31,8 @@ Alexandre works from his iPhone only and does not edit code. He asks for changes
 - Contacts: only business/official numbers. Never add private numbers, door codes or Wi-Fi passwords (public site and public repo).
   Ask before adding the concierge (Axelle / CosyHome).
 - The live slopes map is an embedded infosnow iframe; the piste map links to the official PDF (replace each season).
+- Weather & snow (top of Slopes): live Open-Meteo forecast fetched by the viewer's browser (no key), at 1500 / 2200 / 3000 m like the resort's weather page; links to the official forecast. The container cannot reach the API, so test with mocked responses in Playwright.
+- Section headings and labels: Slopes (weather, live map, piste map, lift ticket number).
 
 ## Git
 

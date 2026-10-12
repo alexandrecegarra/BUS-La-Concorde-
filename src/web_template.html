@@ -118,6 +118,29 @@ header { display: flex; align-items: center; justify-content: space-between; gap
 .card { background: var(--surface); border-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 10px; }
 .card h2 { margin: 0; font-family: var(--display); font-weight: 700; font-size: 22px; }
 .card p { margin: 0; font-size: 15px; line-height: 1.45; color: var(--mute); }
+.wxhead { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+.wxsrc { font-size: 12px; color: var(--mute); white-space: nowrap; }
+.wx .pills { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; overflow: visible; }
+.wx .pills .pill { border-radius: 12px; padding: 7px 4px; font-size: 14px; line-height: 1.15; }
+.wx .pills .pill small { display: block; font-size: 12px; font-weight: 500; opacity: .8; }
+.wxnow { display: flex; align-items: center; gap: 14px; }
+.wxnow svg { width: 56px; height: 56px; flex: none; }
+.wxt { font-family: var(--display); font-weight: 800; font-size: 46px; line-height: 1; color: var(--fg); font-variant-numeric: tabular-nums; }
+.wxd { font-size: 15px; color: var(--mute); line-height: 1.4; }
+.wxd b { color: var(--fg); font-weight: 600; display: block; font-size: 16px; }
+.wxdays { display: flex; flex-direction: column; border-top: 1px solid var(--rule); }
+.wxrow { display: grid; grid-template-columns: 52px 30px minmax(0,1fr) auto; align-items: center; gap: 8px; padding: 9px 0; border-bottom: 1px solid var(--rule); font-size: 15px; }
+.wxrow .day { font-weight: 600; }
+.wxrow svg { width: 26px; height: 26px; }
+.wxrow .lbl { color: var(--mute); font-size: 14px; min-width: 0; }
+.wxrow .lbl .snow { display: inline-block; margin-left: 4px; font-weight: 700; color: var(--navy); }
+.wxrow .tmp { font-variant-numeric: tabular-nums; white-space: nowrap; }
+.wxrow .tmp b { font-weight: 700; }
+.wxrow .tmp span { color: var(--mute); }
+.wxnote { font-size: 12px !important; }
+.wx svg { fill: none; stroke: var(--navy); stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+.wx svg .sun { stroke: #F2A900; }
+.wx svg .flake { stroke: var(--sky); }
 .live { border-radius: 12px; overflow: hidden; background: var(--bg); box-shadow: 0 0 0 1px var(--rule); }
 .live iframe { display: block; width: 100%; height: 62vh; min-height: 380px; border: 0; background: #fff; }
 .card .addr { color: var(--fg); font-size: 17px; line-height: 1.45; }
@@ -224,6 +247,20 @@ header { display: flex; align-items: center; justify-content: space-between; gap
 
   <div id="sec-pistes" hidden>
     <h1 class="sec-title">Slopes</h1>
+    <section class="card wx" aria-live="polite">
+      <div class="wxhead"><h2>Weather &amp; snow</h2><span class="wxsrc" id="wx-upd"></span></div>
+      <div class="pills" role="group" aria-label="Altitude">
+        <button class="pill" data-alt="0" type="button">Resort<small>1500 m</small></button>
+        <button class="pill" data-alt="1" type="button">Violettes<small>2200 m</small></button>
+        <button class="pill" data-alt="2" type="button">Glacier<small>3000 m</small></button>
+      </div>
+      <div id="wx-now" class="wxnow"><p>Loading the forecast…</p></div>
+      <div id="wx-days" class="wxdays"></div>
+      <div class="actions">
+        <a class="btn" href="https://www.crans-montana.ch/fr/meteo" target="_blank" rel="noopener">Official Crans-Montana forecast</a>
+      </div>
+      <p class="wxnote">Live forecast from Open-Meteo, at three altitudes as on the resort's weather page. Fresh snow is the forecast snowfall for the day.</p>
+    </section>
     <section class="card">
       <h2>Live slopes and lifts</h2>
       <p>The official map shows which slopes and lifts are open or closed, in real time.</p>
@@ -232,6 +269,7 @@ header { display: flex; align-items: center; justify-content: space-between; gap
         <a class="btn primary" href="https://www.infosnow.ch/~apgmontagne/?id=141&amp;tab=map-wi2&amp;lang=en" target="_blank" rel="noopener">Open the live map full screen</a>
         <a class="btn" href="https://www.crans-montana.ch/fr/etat_des_pistes_et_installations" target="_blank" rel="noopener">Detailed status: lifts, slopes, avalanche risk</a>
       </div>
+      <p>Lift tickets and information: <a class="tel" href="tel:+41848221012">0848 22 10 12</a></p>
     </section>
     <section class="card">
       <h2>Piste map</h2>
@@ -239,10 +277,6 @@ header { display: flex; align-items: center; justify-content: space-between; gap
       <div class="actions">
         <a class="btn primary" href="https://www.crans-montana.ch/img_up/DOCNONPUB/a32e24eaae168cf7ecf9136b1f450ace.CMTC_PlanPistes_2026_compressed.pdf" target="_blank" rel="noopener">Open the piste map</a>
       </div>
-    </section>
-    <section class="card">
-      <h2>Ski lifts</h2>
-      <p>Tickets and information: <a class="tel" href="tel:+41848221012">0848 22 10 12</a></p>
     </section>
   </div>
 
@@ -415,8 +449,72 @@ header { display: flex; align-items: center; justify-content: space-between; gap
       $('live').appendChild(f);
     }
     if (sec === 'bus') render();
+    if (sec === 'pistes') wxLoad();
     window.scrollTo(0, 0);
   }
+  // ── Weather (Open-Meteo, fetched by the viewer's browser) ──
+  const ALTS = [1500, 2200, 3000];
+  let alt = +(store.get('alt') || 0); if (!(alt in ALTS)) alt = 0;
+  const wxCache = {};
+  const I = {
+    sun: '<circle class="sun" cx="16" cy="16" r="5.5"/><path class="sun" d="M16 4v3M16 25v3M4 16h3M25 16h3M7.5 7.5l2 2M22.5 22.5l2 2M7.5 24.5l2-2M22.5 9.5l2-2"/>',
+    part: '<circle class="sun" cx="12" cy="11" r="4.5"/><path class="sun" d="M12 2.5v2M3.5 11h2M5.8 4.8l1.4 1.4M18.2 4.8l-1.4 1.4"/><path d="M10 26h13a5 5 0 0 0 0-10 7 7 0 0 0-13 2 4 4 0 0 0 0 8z"/>',
+    cloud: '<path d="M8 25h15a6 6 0 0 0 0-12 8 8 0 0 0-15 2.5A4.8 4.8 0 0 0 8 25z"/>',
+    fog: '<path d="M6 12h20M4 17h24M7 22h18"/>',
+    rain: '<path d="M8 19h15a5.5 5.5 0 0 0 0-11 7.5 7.5 0 0 0-14 2.3A4.4 4.4 0 0 0 8 19z"/><path d="M11 23l-1.5 4M17 23l-1.5 4M23 23l-1.5 4"/>',
+    snow: '<path d="M8 18h15a5.5 5.5 0 0 0 0-11 7.5 7.5 0 0 0-14 2.3A4.4 4.4 0 0 0 8 18z"/><path class="flake" d="M10 22v6M7.4 23.5l5.2 3M7.4 26.5l5.2-3M21 22v6M18.4 23.5l5.2 3M18.4 26.5l5.2-3"/>',
+    storm: '<path d="M8 18h15a5.5 5.5 0 0 0 0-11 7.5 7.5 0 0 0-14 2.3A4.4 4.4 0 0 0 8 18z"/><path class="sun" d="M17 19l-3 5h4l-3 5"/>'
+  };
+  function wmo(c) {
+    if (c === 0) return ['sun', 'Clear sky'];
+    if (c === 1) return ['sun', 'Mostly sunny'];
+    if (c === 2) return ['part', 'Partly cloudy'];
+    if (c === 3) return ['cloud', 'Overcast'];
+    if (c === 45 || c === 48) return ['fog', 'Fog'];
+    if (c >= 51 && c <= 57) return ['rain', 'Drizzle'];
+    if ((c >= 61 && c <= 67) || (c >= 80 && c <= 82)) return ['rain', c >= 80 ? 'Showers' : 'Rain'];
+    if ((c >= 71 && c <= 77) || c === 85 || c === 86) return ['snow', c >= 85 ? 'Snow showers' : 'Snow'];
+    if (c >= 95) return ['storm', 'Thunderstorm'];
+    return ['cloud', '—'];
+  }
+  const svg = k => `<svg viewBox="0 0 32 32" aria-hidden="true">${I[k]}</svg>`;
+  const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  function wxRender(d) {
+    document.querySelectorAll('.wx .pill').forEach(p => p.setAttribute('aria-pressed', +p.dataset.alt === alt));
+    if (!d) { $('wx-now').innerHTML = '<p>Forecast unavailable right now. Use the official forecast below.</p>'; $('wx-days').innerHTML = ''; $('wx-upd').textContent = ''; return; }
+    const c = d.current, [ic, lbl] = wmo(c.weather_code);
+    let fl = '';
+    if (d.hourly && d.hourly.freezing_level_height) {
+      const k = d.hourly.time.findIndex(t => t >= c.time.slice(0, 13));
+      const v = d.hourly.freezing_level_height[k < 0 ? 0 : k];
+      if (v != null) fl = ` · freezing level ${Math.round(v / 100) * 100} m`;
+    }
+    $('wx-now').innerHTML = `${svg(ic)}<span class="wxt">${Math.round(c.temperature_2m)}°</span><span class="wxd"><b>${lbl}</b>Wind ${Math.round(c.wind_speed_10m)} km/h${fl}</span>`;
+    const dd = d.daily;
+    $('wx-days').innerHTML = dd.time.map((t, i) => {
+      const [k, l] = wmo(dd.weather_code[i]);
+      const sn = dd.snowfall_sum[i];
+      const dt = new Date(t + 'T12:00:00');
+      const name = i === 0 ? 'Today' : DAYS[dt.getDay()];
+      return `<div class="wxrow"><span class="day">${name}</span>${svg(k)}<span class="lbl">${l}${sn >= 0.5 ? `<span class="snow">+${Math.round(sn)} cm</span>` : ''}</span><span class="tmp"><b>${Math.round(dd.temperature_2m_max[i])}°</b> <span>${Math.round(dd.temperature_2m_min[i])}°</span></span></div>`;
+    }).join('');
+    $('wx-upd').textContent = 'Updated ' + c.time.slice(11, 16);
+  }
+  function wxLoad() {
+    const a = alt;
+    if (wxCache[a] && Date.now() - wxCache[a].at < 15 * 60000) return wxRender(wxCache[a].d);
+    wxRender(wxCache[a] ? wxCache[a].d : undefined);
+    if (!wxCache[a]) $('wx-now').innerHTML = '<p>Loading the forecast…</p>';
+    const url = 'https://api.open-meteo.com/v1/forecast?latitude=46.32&longitude=7.49&elevation=' + ALTS[a] +
+      '&current=temperature_2m,weather_code,wind_speed_10m&hourly=freezing_level_height' +
+      '&daily=weather_code,temperature_2m_max,temperature_2m_min,snowfall_sum&timezone=Europe%2FZurich&forecast_days=5';
+    fetch(url).then(r => r.ok ? r.json() : Promise.reject(r.status)).then(d => {
+      wxCache[a] = { d, at: Date.now() };
+      if (alt === a) wxRender(d);
+    }).catch(() => { if (alt === a && !wxCache[a]) wxRender(undefined); });
+  }
+  document.querySelectorAll('.wx .pill').forEach(p => p.addEventListener('click', () => { alt = +p.dataset.alt; store.set('alt', alt); wxLoad(); }));
+
   document.querySelectorAll('.nav').forEach(n => n.addEventListener('click', () => showSec(n.dataset.sec)));
   showSec(sec);
   setInterval(() => { if (sec === 'bus') render(); }, 30000);
