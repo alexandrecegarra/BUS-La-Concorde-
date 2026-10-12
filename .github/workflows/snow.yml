@@ -1,7 +1,7 @@
 name: Update measured snow depth
 on:
   schedule:
-    - cron: '23 * * * *'
+    - cron: '23 */2 * * *'
   workflow_dispatch:
 permissions:
   contents: write

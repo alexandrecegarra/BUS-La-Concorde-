@@ -1,5 +1,5 @@
 """Fetch measured snow depth near Crans-Montana from the SLF measurement API (CC BY 4.0)
-and write data/snow.json for the site. Run hourly by .github/workflows/snow.yml."""
+and write data/snow.json for the site. Run every two hours by .github/workflows/snow.yml."""
 import json, os, urllib.request, datetime
 
 API = 'https://measurement-api.slf.ch/public/api'

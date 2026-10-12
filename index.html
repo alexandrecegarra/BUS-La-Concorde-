@@ -147,6 +147,14 @@ header { display: flex; align-items: center; justify-content: space-between; gap
 .wxt { font-family: var(--display); font-weight: 800; font-size: 46px; line-height: 1; color: var(--fg); font-variant-numeric: tabular-nums; }
 .wxd { font-size: 15px; color: var(--mute); line-height: 1.4; }
 .wxd b { color: var(--fg); font-weight: 600; display: block; font-size: 16px; }
+.meas { display: flex; flex-direction: column; gap: 0; border-radius: 12px; background: var(--tip); padding: 4px 12px; }
+.meas h3 { margin: 8px 0 2px; font-size: 13px; font-weight: 600; color: var(--mute); text-transform: uppercase; letter-spacing: .06em; }
+.mrow { display: grid; grid-template-columns: minmax(0,1fr) auto; gap: 2px 10px; padding: 8px 0; border-top: 1px solid var(--rule); }
+.mrow:first-of-type { border-top: 0; }
+.mrow b { font-weight: 600; }
+.mrow .hs { font-family: var(--display); font-weight: 800; font-size: 24px; color: var(--navy); text-align: right; grid-row: span 2; align-self: center; font-variant-numeric: tabular-nums; }
+.mrow small { font-size: 12px; color: var(--mute); }
+.meas .src { font-size: 11px; color: var(--mute); margin: 0 0 8px; }
 .wxdays { display: flex; flex-direction: column; border-top: 1px solid var(--rule); }
 .wxrow { display: grid; grid-template-columns: 46px 28px minmax(0,1fr) 54px 62px; align-items: center; gap: 8px; padding: 9px 0; border-bottom: 1px solid var(--rule); font-size: 15px; }
 .wxrow .day { font-weight: 600; }
@@ -278,12 +286,13 @@ header { display: flex; align-items: center; justify-content: space-between; gap
         <button class="pill" data-alt="2" type="button">Glacier<small>3000 m</small></button>
       </div>
       <div id="wx-now" class="wxnow"><p>Loading the forecast…</p></div>
+      <div id="snow-meas" class="meas"></div>
       <div id="wx-days" class="wxdays"></div>
       <div class="actions">
         <a class="btn" href="https://www.skiinfo.fr/valais/crans-montana/bulletin-neige" target="_blank" rel="noopener">Snow report measured by the resort</a>
         <a class="btn" href="https://www.crans-montana.ch/fr/meteo" target="_blank" rel="noopener">Official Crans-Montana forecast</a>
       </div>
-      <p class="wxnote">Live forecast from Open-Meteo, at three altitudes as on the resort's weather page. Snow on the ground is a model estimate for that altitude, not a measurement on the slopes; the snow report gives the resort's measured depths.</p>
+      <p class="wxnote">Live forecast from Open-Meteo, at three altitudes as on the resort's weather page. Measured depths come from SLF stations; model snow cover is only an estimate. The snow report gives the depths announced by the resort for the slopes.</p>
     </section>
     <section class="card">
       <h2>Live slopes and lifts</h2>
@@ -502,7 +511,7 @@ header { display: flex; align-items: center; justify-content: space-between; gap
       $('live').appendChild(f);
     }
     if (sec === 'bus') render();
-    if (sec === 'pistes') wxLoad();
+    if (sec === 'pistes') { wxLoad(); snowLoad(); }
     window.scrollTo(0, 0);
   }
   // ── Weather (Open-Meteo, fetched by the viewer's browser) ──
@@ -548,7 +557,7 @@ header { display: flex; align-items: center; justify-content: space-between; gap
     const depth = sd == null ? null : Math.round(sd * 100);
     const total = Math.round(dd.snowfall_sum.reduce((x, y) => x + (y || 0), 0));
     $('wx-now').innerHTML = `<div class="wxcur">${svg(ic)}<span class="wxt">${Math.round(c.temperature_2m)}°</span><span class="wxd"><b>${lbl}</b>Wind ${Math.round(c.wind_speed_10m)} km/h${fl}</span></div>` +
-      `<div class="wxsnow"><div><span class="k">Snow on the ground</span><span class="v">${depth == null ? '–' : depth + ' cm'}</span></div><div><span class="k">Fresh snow, next 5 days</span><span class="v">${total > 0 ? '+' + total + ' cm' : '0 cm'}</span></div></div>`;
+      `<div class="wxsnow"><div><span class="k">Fresh snow, next 5 days</span><span class="v">${total > 0 ? '+' + total + ' cm' : '0 cm'}</span><span class="k">forecast at ${ALTS[alt]} m</span></div><div><span class="k">Model snow cover</span><span class="v">${depth == null ? '–' : depth + ' cm'}</span><span class="k">estimate at ${ALTS[alt]} m</span></div></div>`;
     $('wx-days').innerHTML = dd.time.map((t, i) => {
       const [k, l] = wmo(dd.weather_code[i]);
       const sn = dd.snowfall_sum[i];
@@ -572,6 +581,20 @@ header { display: flex; align-items: center; justify-content: space-between; gap
     }).catch(() => { if (alt === a && !wxCache[a]) wxRender(undefined); });
   }
   document.querySelectorAll('.wx .pill').forEach(p => p.addEventListener('click', () => { alt = +p.dataset.alt; store.set('alt', alt); wxLoad(); }));
+  let snowAt = 0;
+  function snowLoad() {
+    if (Date.now() - snowAt < 10 * 60000) return;
+    fetch('data/snow.json?t=' + Math.floor(Date.now() / 600000)).then(r => r.ok ? r.json() : Promise.reject()).then(j => {
+      snowAt = Date.now();
+      const st = (j.stations || []);
+      if (!st.length) { $('snow-meas').hidden = true; return; }
+      const fmt = d => { if (!d) return ''; const t = new Date(d); return isNaN(t) ? '' : t.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) + ', ' + t.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Zurich' }); };
+      $('snow-meas').hidden = false;
+      $('snow-meas').innerHTML = '<h3>Measured snow depth</h3>' + st.map(x =>
+        `<div class="mrow"><span><b>${x.label}</b> · ${x.elevation} m${x.new24 ? ` · <b>+${x.new24} cm</b> new` : ''}</span><span class="hs">${x.hs == null ? '–' : x.hs + ' cm'}</span><small>${x.hs == null ? 'No measurement yet this season' : fmt(x.date)} · ${x.note}</small></div>`).join('') +
+        '<p class="src">Measurements: WSL Institute for Snow and Avalanche Research SLF (slf.ch), updated every two hours.</p>';
+    }).catch(() => { $('snow-meas').hidden = true; });
+  }
 
   document.querySelectorAll('.nav').forEach(n => n.addEventListener('click', () => showSec(n.dataset.sec)));
   showSec(sec);
