@@ -38,6 +38,18 @@ Alexandre works from his iPhone only and does not edit code. He asks for changes
   The workflow can be triggered with `gh api -X POST repos/alexandrecegarra/BUS-La-Concorde-/actions/workflows/snow.yml/dispatches -f ref=main`.
 - Section headings and labels: Slopes (weather, live map, piste map, lift ticket number).
 
+## Contents at a glance
+
+- Contacts: La Concorde address card with Google Maps link (top), emergencies, health (two medical centres,
+  osteopath Manon Barras, pharmacies), resort (lifts, tourist office, SMC), practical (Cry d'Er ski lockers, Fougirs recycling centre).
+- Eat: on the slopes, Michelin-starred, Fine tables, Convivial & lively. Alexandre chose not to add other categories.
+
+## Open points to check later
+
+- From the first snowfalls (November): confirm the SLF Montana plot (4MO0) returns data; if it stays empty, pick another station.
+- Gault&Millau 2027 scores (guide published 5 Oct 2026): update the tags in `src/restos.py`; Byakko entered the 2027 guide.
+- Each season: new piste map PDF link; new bus timetables from mid-December 2027 (2028 timetable year).
+
 ## Git
 
 Commit as `alexandrecegarra <alexandrecegarra@users.noreply.github.com>`.
