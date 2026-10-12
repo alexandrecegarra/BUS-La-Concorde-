@@ -491,14 +491,16 @@ header { display: flex; align-items: center; justify-content: space-between; gap
     document.querySelectorAll('.wx .pill').forEach(p => p.setAttribute('aria-pressed', +p.dataset.alt === alt));
     if (!d) { $('wx-now').innerHTML = '<p>Forecast unavailable right now. Use the official forecast below.</p>'; $('wx-days').innerHTML = ''; $('wx-upd').textContent = ''; return; }
     const c = d.current, [ic, lbl] = wmo(c.weather_code);
-    let fl = '';
-    if (d.hourly && d.hourly.freezing_level_height) {
-      const k = d.hourly.time.findIndex(t => t >= c.time.slice(0, 13));
-      const v = d.hourly.freezing_level_height[k < 0 ? 0 : k];
+    let fl = '', sd = null;
+    if (d.hourly && d.hourly.time) {
+      let k = d.hourly.time.findIndex(t => t.slice(0, 13) === c.time.slice(0, 13));
+      if (k < 0) k = 0;
+      const v = (d.hourly.freezing_level_height || [])[k];
       if (v != null) fl = ` · freezing level ${Math.round(v / 100) * 100} m`;
+      sd = (d.hourly.snow_depth || [])[k];
     }
     const dd = d.daily;
-    const depth = c.snow_depth == null ? null : Math.round(c.snow_depth * 100);
+    const depth = sd == null ? null : Math.round(sd * 100);
     const total = Math.round(dd.snowfall_sum.reduce((x, y) => x + (y || 0), 0));
     $('wx-now').innerHTML = `<div class="wxcur">${svg(ic)}<span class="wxt">${Math.round(c.temperature_2m)}°</span><span class="wxd"><b>${lbl}</b>Wind ${Math.round(c.wind_speed_10m)} km/h${fl}</span></div>` +
       `<div class="wxsnow"><div><span class="k">Snow on the ground</span><span class="v">${depth == null ? '–' : depth + ' cm'}</span></div><div><span class="k">Fresh snow, next 5 days</span><span class="v">${total > 0 ? '+' + total + ' cm' : '0 cm'}</span></div></div>`;
@@ -517,7 +519,7 @@ header { display: flex; align-items: center; justify-content: space-between; gap
     wxRender(wxCache[a] ? wxCache[a].d : undefined);
     if (!wxCache[a]) $('wx-now').innerHTML = '<p>Loading the forecast…</p>';
     const url = 'https://api.open-meteo.com/v1/forecast?latitude=46.32&longitude=7.49&elevation=' + ALTS[a] +
-      '&current=temperature_2m,weather_code,wind_speed_10m,snow_depth&hourly=freezing_level_height' +
+      '&current=temperature_2m,weather_code,wind_speed_10m&hourly=freezing_level_height,snow_depth' +
       '&daily=weather_code,temperature_2m_max,temperature_2m_min,snowfall_sum&timezone=Europe%2FZurich&forecast_days=5';
     fetch(url).then(r => r.ok ? r.json() : Promise.reject(r.status)).then(d => {
       wxCache[a] = { d, at: Date.now() };
