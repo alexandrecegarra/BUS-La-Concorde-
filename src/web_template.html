@@ -123,17 +123,24 @@ header { display: flex; align-items: center; justify-content: space-between; gap
 .wx .pills { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; overflow: visible; }
 .wx .pills .pill { border-radius: 12px; padding: 7px 4px; font-size: 14px; line-height: 1.15; }
 .wx .pills .pill small { display: block; font-size: 12px; font-weight: 500; opacity: .8; }
-.wxnow { display: flex; align-items: center; gap: 14px; }
+.wxnow { display: flex; flex-direction: column; gap: 12px; }
+.wxcur { display: flex; align-items: center; gap: 14px; }
+.wxsnow { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.wxsnow > div { background: var(--bg); border-radius: 12px; padding: 10px 12px; display: flex; flex-direction: column; gap: 2px; }
+.wxsnow .k { font-size: 12px; color: var(--mute); }
+.wxsnow .v { font-family: var(--display); font-weight: 800; font-size: 26px; color: var(--navy); font-variant-numeric: tabular-nums; }
 .wxnow svg { width: 56px; height: 56px; flex: none; }
 .wxt { font-family: var(--display); font-weight: 800; font-size: 46px; line-height: 1; color: var(--fg); font-variant-numeric: tabular-nums; }
 .wxd { font-size: 15px; color: var(--mute); line-height: 1.4; }
 .wxd b { color: var(--fg); font-weight: 600; display: block; font-size: 16px; }
 .wxdays { display: flex; flex-direction: column; border-top: 1px solid var(--rule); }
-.wxrow { display: grid; grid-template-columns: 52px 30px minmax(0,1fr) auto; align-items: center; gap: 8px; padding: 9px 0; border-bottom: 1px solid var(--rule); font-size: 15px; }
+.wxrow { display: grid; grid-template-columns: 46px 28px minmax(0,1fr) 54px 62px; align-items: center; gap: 8px; padding: 9px 0; border-bottom: 1px solid var(--rule); font-size: 15px; }
 .wxrow .day { font-weight: 600; }
 .wxrow svg { width: 26px; height: 26px; }
 .wxrow .lbl { color: var(--mute); font-size: 14px; min-width: 0; }
-.wxrow .lbl .snow { display: inline-block; margin-left: 4px; font-weight: 700; color: var(--navy); }
+.wxrow .sn { text-align: right; color: var(--mute); font-variant-numeric: tabular-nums; }
+.wxrow .sn.on { color: var(--navy); font-weight: 700; }
+.wxrow .tmp { text-align: right; }
 .wxrow .tmp { font-variant-numeric: tabular-nums; white-space: nowrap; }
 .wxrow .tmp b { font-weight: 700; }
 .wxrow .tmp span { color: var(--mute); }
@@ -257,9 +264,10 @@ header { display: flex; align-items: center; justify-content: space-between; gap
       <div id="wx-now" class="wxnow"><p>Loading the forecast…</p></div>
       <div id="wx-days" class="wxdays"></div>
       <div class="actions">
+        <a class="btn" href="https://www.skiinfo.fr/valais/crans-montana/bulletin-neige" target="_blank" rel="noopener">Snow report measured by the resort</a>
         <a class="btn" href="https://www.crans-montana.ch/fr/meteo" target="_blank" rel="noopener">Official Crans-Montana forecast</a>
       </div>
-      <p class="wxnote">Live forecast from Open-Meteo, at three altitudes as on the resort's weather page. Fresh snow is the forecast snowfall for the day.</p>
+      <p class="wxnote">Live forecast from Open-Meteo, at three altitudes as on the resort's weather page. Snow on the ground is a model estimate for that altitude, not a measurement on the slopes; the snow report gives the resort's measured depths.</p>
     </section>
     <section class="card">
       <h2>Live slopes and lifts</h2>
@@ -489,14 +497,17 @@ header { display: flex; align-items: center; justify-content: space-between; gap
       const v = d.hourly.freezing_level_height[k < 0 ? 0 : k];
       if (v != null) fl = ` · freezing level ${Math.round(v / 100) * 100} m`;
     }
-    $('wx-now').innerHTML = `${svg(ic)}<span class="wxt">${Math.round(c.temperature_2m)}°</span><span class="wxd"><b>${lbl}</b>Wind ${Math.round(c.wind_speed_10m)} km/h${fl}</span>`;
     const dd = d.daily;
+    const depth = c.snow_depth == null ? null : Math.round(c.snow_depth * 100);
+    const total = Math.round(dd.snowfall_sum.reduce((x, y) => x + (y || 0), 0));
+    $('wx-now').innerHTML = `<div class="wxcur">${svg(ic)}<span class="wxt">${Math.round(c.temperature_2m)}°</span><span class="wxd"><b>${lbl}</b>Wind ${Math.round(c.wind_speed_10m)} km/h${fl}</span></div>` +
+      `<div class="wxsnow"><div><span class="k">Snow on the ground</span><span class="v">${depth == null ? '–' : depth + ' cm'}</span></div><div><span class="k">Fresh snow, next 5 days</span><span class="v">${total > 0 ? '+' + total + ' cm' : '0 cm'}</span></div></div>`;
     $('wx-days').innerHTML = dd.time.map((t, i) => {
       const [k, l] = wmo(dd.weather_code[i]);
       const sn = dd.snowfall_sum[i];
       const dt = new Date(t + 'T12:00:00');
       const name = i === 0 ? 'Today' : DAYS[dt.getDay()];
-      return `<div class="wxrow"><span class="day">${name}</span>${svg(k)}<span class="lbl">${l}${sn >= 0.5 ? `<span class="snow">+${Math.round(sn)} cm</span>` : ''}</span><span class="tmp"><b>${Math.round(dd.temperature_2m_max[i])}°</b> <span>${Math.round(dd.temperature_2m_min[i])}°</span></span></div>`;
+      return `<div class="wxrow"><span class="day">${name}</span>${svg(k)}<span class="lbl">${l}</span><span class="sn${sn >= 0.5 ? ' on' : ''}">${sn >= 0.5 ? '+' + Math.round(sn) + ' cm' : '–'}</span><span class="tmp"><b>${Math.round(dd.temperature_2m_max[i])}°</b> <span>${Math.round(dd.temperature_2m_min[i])}°</span></span></div>`;
     }).join('');
     $('wx-upd').textContent = 'Updated ' + c.time.slice(11, 16);
   }
@@ -506,7 +517,7 @@ header { display: flex; align-items: center; justify-content: space-between; gap
     wxRender(wxCache[a] ? wxCache[a].d : undefined);
     if (!wxCache[a]) $('wx-now').innerHTML = '<p>Loading the forecast…</p>';
     const url = 'https://api.open-meteo.com/v1/forecast?latitude=46.32&longitude=7.49&elevation=' + ALTS[a] +
-      '&current=temperature_2m,weather_code,wind_speed_10m&hourly=freezing_level_height' +
+      '&current=temperature_2m,weather_code,wind_speed_10m,snow_depth&hourly=freezing_level_height' +
       '&daily=weather_code,temperature_2m_max,temperature_2m_min,snowfall_sum&timezone=Europe%2FZurich&forecast_days=5';
     fetch(url).then(r => r.ok ? r.json() : Promise.reject(r.status)).then(d => {
       wxCache[a] = { d, at: Date.now() };
