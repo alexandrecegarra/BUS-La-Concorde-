@@ -292,7 +292,7 @@ header { display: flex; align-items: center; justify-content: space-between; gap
         <a class="btn" href="https://www.skiinfo.fr/valais/crans-montana/bulletin-neige" target="_blank" rel="noopener">Snow report measured by the resort</a>
         <a class="btn" href="https://www.crans-montana.ch/fr/meteo" target="_blank" rel="noopener">Official Crans-Montana forecast</a>
       </div>
-      <p class="wxnote">Live forecast from Open-Meteo, at three altitudes as on the resort's weather page. Measured depths come from SLF stations; model snow cover is only an estimate. The snow report gives the depths announced by the resort for the slopes.</p>
+      <p class="wxnote">Forecast from MeteoSwiss's high-resolution model (ICON-CH, 1–2 km) via Open-Meteo, at three altitudes as on the resort's weather page. Measured depths come from SLF stations; model snow cover is only an estimate. The snow report gives the depths announced by the resort for the slopes.</p>
     </section>
     <section class="card">
       <h2>Live slopes and lifts</h2>
@@ -575,7 +575,9 @@ header { display: flex; align-items: center; justify-content: space-between; gap
     const url = 'https://api.open-meteo.com/v1/forecast?latitude=46.32&longitude=7.49&elevation=' + ALTS[a] +
       '&current=temperature_2m,weather_code,wind_speed_10m&hourly=freezing_level_height,snow_depth' +
       '&daily=weather_code,temperature_2m_max,temperature_2m_min,snowfall_sum&timezone=Europe%2FZurich&forecast_days=5';
-    fetch(url).then(r => r.ok ? r.json() : Promise.reject(r.status)).then(d => {
+    // MeteoSwiss ICON-CH1/CH2 (1–2 km, official Swiss model); fall back to Open-Meteo's best match if unavailable
+    const get = u => fetch(u).then(r => r.ok ? r.json() : Promise.reject(r.status)).then(d => (d && d.current && d.daily && d.daily.time) ? d : Promise.reject('incomplete'));
+    get(url + '&models=meteoswiss_icon_seamless').catch(() => get(url)).then(d => {
       wxCache[a] = { d, at: Date.now() };
       if (alt === a) wxRender(d);
     }).catch(() => { if (alt === a && !wxCache[a]) wxRender(undefined); });
