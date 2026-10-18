@@ -1,5 +1,5 @@
 {
- "updated": "2026-10-18T14:45+00:00",
+ "updated": "2026-10-18T16:48+00:00",
  "source": "WSL Institute for Snow and Avalanche Research SLF, www.slf.ch (CC BY 4.0)",
  "stations": [
   {
@@ -18,7 +18,7 @@
    "elevation": 2459,
    "note": "Automatic station, 9 km east of Crans-Montana",
    "hs": 0,
-   "date": "2026-10-18T14:30:00Z",
+   "date": "2026-10-18T16:30:00Z",
    "new24": null
   }
  ]
