@@ -170,6 +170,10 @@ header { display: flex; align-items: center; justify-content: space-between; gap
 .wx svg { fill: none; stroke: var(--navy); stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
 .wx svg .sun { stroke: #F2A900; }
 .wx svg .flake { stroke: var(--sky); }
+.camimg { display: block; border-radius: 12px; overflow: hidden; background: var(--bg); box-shadow: 0 0 0 1px var(--rule); aspect-ratio: 16 / 9; position: relative; text-decoration: none; }
+.camimg img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.camimg span { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; text-align: center; padding: 16px; font-size: 14px; color: var(--mute); }
+.camcap { font-size: 13px !important; }
 .live { border-radius: 12px; overflow: hidden; background: var(--bg); box-shadow: 0 0 0 1px var(--rule); }
 .live iframe { display: block; width: 100%; height: 62vh; min-height: 380px; border: 0; background: #fff; }
 .card .addr { color: var(--fg); font-size: 17px; line-height: 1.45; }
@@ -294,6 +298,11 @@ header { display: flex; align-items: center; justify-content: space-between; gap
         <a class="btn" href="https://www.crans-montana.ch/fr/meteo" target="_blank" rel="noopener">Official Crans-Montana forecast</a>
       </div>
       <p class="wxnote">Forecast from MeteoSwiss's high-resolution model (ICON-CH, 1–2 km) via Open-Meteo, at three altitudes as on the resort's weather page. Measured depths come from SLF stations; model snow cover is only an estimate. The snow report gives the depths announced by the resort for the slopes.</p>
+    </section>
+    <section class="card cam">
+      <h2>Plaine Morte webcam</h2>
+      <a class="camimg" id="cam-link" href="https://www.skaping.com/crans-montana/plaine-morte" target="_blank" rel="noopener"><img id="cam-img" alt="Latest webcam photo of the Plaine Morte glacier" hidden><span id="cam-msg">Loading the latest photo…</span></a>
+      <p class="camcap" id="cam-cap">Glacier de la Plaine Morte, 2880 m, top of the ski area. Tap the photo for the full panorama and the archive.</p>
     </section>
     <section class="card">
       <h2>Live slopes and lifts</h2>
@@ -512,7 +521,7 @@ header { display: flex; align-items: center; justify-content: space-between; gap
       $('live').appendChild(f);
     }
     if (sec === 'bus') render();
-    if (sec === 'pistes') { wxLoad(); snowLoad(); }
+    if (sec === 'pistes') { wxLoad(); snowLoad(); camLoad(); }
     window.scrollTo(0, 0);
   }
   // ── Weather (Open-Meteo, fetched by the viewer's browser) ──
@@ -584,6 +593,22 @@ header { display: flex; align-items: center; justify-content: space-between; gap
     }).catch(() => { if (alt === a && !wxCache[a]) wxRender(undefined); });
   }
   document.querySelectorAll('.wx .pill').forEach(p => p.addEventListener('click', () => { alt = +p.dataset.alt; store.set('alt', alt); wxLoad(); }));
+  // Plaine Morte webcam (Skaping): one photo per hour, path in Swiss local time
+  let camAt = 0;
+  function camLoad() {
+    if (Date.now() - camAt < 10 * 60000) return;
+    camAt = Date.now();
+    const parts = t => Object.fromEntries(new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Zurich', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', hourCycle: 'h23' }).formatToParts(t).map(p => [p.type, p.value]));
+    const img = $('cam-img'), msg = $('cam-msg');
+    let tries = 0;
+    const attempt = () => {
+      const p = parts(new Date(Date.now() - tries * 3600000));
+      img.onload = () => { img.hidden = false; msg.hidden = true; $('cam-cap').textContent = `Glacier de la Plaine Morte, 2880 m, top of the ski area. Photo of ${p.hour}:00 (Skaping). Tap for the full panorama and the archive.`; };
+      img.onerror = () => { tries++; if (tries < 4) attempt(); else { img.hidden = true; msg.hidden = false; msg.textContent = 'Webcam photo unavailable right now. Tap to open the webcam.'; } };
+      img.src = `https://skaping.s3.gra.io.cloud.ovh.net/crans-montana/plaine-morte/${p.year}/${p.month}/${p.day}/large/${p.hour}-00.jpg`;
+    };
+    attempt();
+  }
   let snowAt = 0;
   function snowLoad() {
     if (Date.now() - snowAt < 10 * 60000) return;

@@ -36,7 +36,10 @@ Alexandre works from his iPhone only and does not edit code. He asks for changes
   from the SLF measurement API (CC BY 4.0, credit SLF): study plot 4MO0 Montana 1590 m (observer, in season only) and IMIS TRU2 Trubelboden 2459 m.
   The site reads `data/snow.json`. If it stops updating, check the Actions tab (GitHub disables scheduled workflows after 60 days without repo activity).
   The workflow can be triggered with `gh api -X POST repos/alexandrecegarra/BUS-La-Concorde-/actions/workflows/snow.yml/dispatches -f ref=main`.
-- Section headings and labels: Slopes (weather, live map, piste map, lift ticket number).
+- Plaine Morte webcam (Slopes, after the weather): Skaping camera used by the resort (https://www.skaping.com/crans-montana/plaine-morte).
+  One photo per hour; the page loads `https://skaping.s3.gra.io.cloud.ovh.net/crans-montana/plaine-morte/YYYY/MM/DD/large/HH-00.jpg`
+  in Swiss local time, falls back up to 3 hours, then shows a link. The photo links to the Skaping page (credit). If the URL pattern changes, read the og:image of the Skaping page.
+- Section headings and labels: Slopes (weather, webcam, live map, piste map, lift ticket number).
 
 ## Contents at a glance
 
