@@ -552,7 +552,7 @@ header { display: flex; align-items: center; justify-content: space-between; gap
   // Webcam matching the selected altitude: golf (live image), Les Violettes and Plaine Morte (Skaping,
   // latest photo URL found hourly by .github/workflows/webcams.yml into data/webcams.json)
   const CAMS = [
-    { name: 'Crans, golf driving range', alt: 'about 1500 m', live: 'https://www.golfcrans.ch/fr/api/webcam/Driving', page: 'https://www.crans-montana.ch/fr/webcam', credit: 'Golf-Club Crans-sur-Sierre' },
+    { name: 'Crans, golf driving range', alt: 'about 1500 m', live: 'https://www.golfcrans.ch/fr/api/webcam/Driving', page: 'https://lhm.roundshot.com/', credit: 'Golf-Club Crans-sur-Sierre', tap: 'tap the photo for the 360° panorama of the resort' },
     { name: 'Les Violettes', alt: '2200 m', slug: 'les-violettes', page: 'https://www.skaping.com/crans-montana/les-violettes', credit: 'Skaping' },
     { name: 'Plaine Morte glacier', alt: '2880 m', slug: 'plaine-morte', page: 'https://www.skaping.com/crans-montana/plaine-morte', credit: 'Skaping' }
   ];
@@ -564,7 +564,7 @@ header { display: flex; align-items: center; justify-content: space-between; gap
     const fail = () => { img.hidden = true; msg.hidden = false; msg.textContent = 'Webcam photo unavailable right now. Tap to open the webcam.'; $('cam-cap').innerHTML = `<b>${c.name}</b>, ${c.alt}. Source: ${c.credit}.`; };
     const show = (src, when) => {
       img.hidden = true; msg.hidden = false; msg.textContent = 'Loading the webcam…';
-      img.onload = () => { img.hidden = false; msg.hidden = true; $('cam-cap').innerHTML = `<b>${c.name}</b>, ${c.alt}. ${when}. Source: ${c.credit}; tap the photo for the full view.`; };
+      img.onload = () => { img.hidden = false; msg.hidden = true; $('cam-cap').innerHTML = `<b>${c.name}</b>, ${c.alt}. ${when}. Source: ${c.credit}; ${c.tap || 'tap the photo to open it full screen and turn the view'}.`; };
       img.onerror = fail;
       img.src = src;
     };

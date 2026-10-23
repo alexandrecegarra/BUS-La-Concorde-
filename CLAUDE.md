@@ -40,7 +40,7 @@ Alexandre works from his iPhone only and does not edit code. He asks for changes
   (live image `https://www.golfcrans.ch/fr/api/webcam/Driving`, cache-busted every 10 min); 2200 m = Skaping Les Violettes;
   3000 m = Skaping Plaine Morte (2880 m). Skaping photo times vary (e.g. 09:02), so `.github/workflows/webcams.yml` runs
   `scripts/fetch_webcams.py` hourly: it reads the og:image of each Skaping page and writes `data/webcams.json` (keeps the previous photo on failure).
-  The page shows the photo date/time and credits the source; tap opens the camera page. These are the cameras listed on https://www.crans-montana.ch/fr/webcam.
+  The page shows the photo date/time and credits the source; tap opens the camera's own viewer (Skaping, which can be turned), and at 1500 m the Roundshot 360° camera of the resort (https://lhm.roundshot.com/, Clinique Lucernoise), never the resort's webcam list page. These are the cameras listed on https://www.crans-montana.ch/fr/webcam.
 - Section headings and labels: Slopes (weather with webcam, live map, piste map, lift ticket number).
 
 ## Contents at a glance
