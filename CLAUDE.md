@@ -36,11 +36,13 @@ Alexandre works from his iPhone only and does not edit code. He asks for changes
   from the SLF measurement API (CC BY 4.0, credit SLF): study plot 4MO0 Montana 1590 m (observer, daily morning reading; confirmed returning data in Oct 2026) and IMIS TRU2 Trubelboden 2459 m.
   The site reads `data/snow.json`. If it stops updating, check the Actions tab (GitHub disables scheduled workflows after 60 days without repo activity).
   The workflow can be triggered with `gh api -X POST repos/alexandrecegarra/BUS-La-Concorde-/actions/workflows/snow.yml/dispatches -f ref=main`.
-- Webcam inside the weather card, following the altitude buttons: 1500 m = Golf-Club Crans-sur-Sierre driving range
-  (live image `https://www.golfcrans.ch/fr/api/webcam/Driving`, cache-busted every 10 min); 2200 m = Skaping Les Violettes;
-  3000 m = Skaping Plaine Morte (2880 m). Skaping photo times vary (e.g. 09:02), so `.github/workflows/webcams.yml` runs
-  `scripts/fetch_webcams.py` hourly: it reads the og:image of each Skaping page and writes `data/webcams.json` (keeps the previous photo on failure).
-  The page shows the photo date/time and credits the source; tap opens the camera's own viewer (Skaping, which can be turned), and at 1500 m the Roundshot 360° camera of the resort (https://lhm.roundshot.com/, Clinique Lucernoise), never the resort's webcam list page. These are the cameras listed on https://www.crans-montana.ch/fr/webcam.
+- Webcam inside the weather card, following the altitude buttons. 1500 m = Hôtel Le Splendide, Crans (1485 m), chosen by Alexandre
+  because he wants Crans (not Montana) and a view like his apartment's; image `https://www.hotel-splendide.com/wp-content/uploads/2016/06/Webcam-Splendide-Crans-Montana.jpg`
+  (overwritten about hourly, cache-busted every 10 min; tap opens the image full size). Rejected for 1500 m: golf driving range (golfcrans.ch API)
+  and the Montana Roundshot (lhm.roundshot.com, Clinique Lucernoise). 2200 m = Skaping Les Violettes; 3000 m = Skaping Plaine Morte (2880 m).
+  Skaping photo times vary (e.g. 09:02), so `.github/workflows/webcams.yml` runs `scripts/fetch_webcams.py` hourly: it reads the og:image of
+  each Skaping page and writes `data/webcams.json` (keeps the previous photo on failure). Skaping photos open the Skaping viewer (big, can be turned).
+  Never link to the resort's webcam list page. Cameras listed on https://www.crans-montana.ch/fr/webcam.
 - Section headings and labels: Slopes (weather with webcam, live map, piste map, lift ticket number).
 
 ## Contents at a glance

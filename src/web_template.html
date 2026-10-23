@@ -552,7 +552,7 @@ header { display: flex; align-items: center; justify-content: space-between; gap
   // Webcam matching the selected altitude: golf (live image), Les Violettes and Plaine Morte (Skaping,
   // latest photo URL found hourly by .github/workflows/webcams.yml into data/webcams.json)
   const CAMS = [
-    { name: 'Crans, golf driving range', alt: 'about 1500 m', live: 'https://www.golfcrans.ch/fr/api/webcam/Driving', page: 'https://lhm.roundshot.com/', credit: 'Golf-Club Crans-sur-Sierre', tap: 'tap the photo for the 360° panorama of the resort' },
+    { name: 'Crans, Hôtel Le Splendide', alt: '1485 m', live: 'https://www.hotel-splendide.com/wp-content/uploads/2016/06/Webcam-Splendide-Crans-Montana.jpg', page: 'https://www.hotel-splendide.com/wp-content/uploads/2016/06/Webcam-Splendide-Crans-Montana.jpg', credit: 'Hôtel Le Splendide', tap: 'tap the photo to open it full size', when: 'Updated every hour' },
     { name: 'Les Violettes', alt: '2200 m', slug: 'les-violettes', page: 'https://www.skaping.com/crans-montana/les-violettes', credit: 'Skaping' },
     { name: 'Plaine Morte glacier', alt: '2880 m', slug: 'plaine-morte', page: 'https://www.skaping.com/crans-montana/plaine-morte', credit: 'Skaping' }
   ];
@@ -568,7 +568,7 @@ header { display: flex; align-items: center; justify-content: space-between; gap
       img.onerror = fail;
       img.src = src;
     };
-    if (c.live) return show(c.live + '?t=' + Math.floor(Date.now() / 600000), 'Live image');
+    if (c.live) { const src = c.live + '?t=' + Math.floor(Date.now() / 600000); $('cam-link').href = src; return show(src, c.when || 'Live image'); }
     const go = () => {
       const d = camData && camData[c.slug];
       if (!d || !d.url) return fail();
