@@ -33,13 +33,15 @@ Alexandre works from his iPhone only and does not edit code. He asks for changes
 - The live slopes map is an embedded infosnow iframe; the piste map links to the official PDF (replace each season).
 - Weather & snow (top of Slopes): MeteoSwiss ICON-CH1/CH2 forecast (Open-Meteo `models=meteoswiss_icon_seamless`, fallback to best match) fetched by the viewer's browser (no key), at 1500 / 2200 / 3000 m like the resort's weather page: current conditions, model snow cover (Open-Meteo estimate, labelled as such), fresh snow forecast per day and 5-day total; links to the measured snow report (skiinfo) and the official forecast. The container cannot reach the API, so test with mocked responses in Playwright.
 - Measured snow depth: `.github/workflows/snow.yml` runs `scripts/fetch_snow.py` every two hours (GitHub Actions) and commits `data/snow.json`
-  from the SLF measurement API (CC BY 4.0, credit SLF): study plot 4MO0 Montana 1590 m (observer, in season only) and IMIS TRU2 Trubelboden 2459 m.
+  from the SLF measurement API (CC BY 4.0, credit SLF): study plot 4MO0 Montana 1590 m (observer, daily morning reading; confirmed returning data in Oct 2026) and IMIS TRU2 Trubelboden 2459 m.
   The site reads `data/snow.json`. If it stops updating, check the Actions tab (GitHub disables scheduled workflows after 60 days without repo activity).
   The workflow can be triggered with `gh api -X POST repos/alexandrecegarra/BUS-La-Concorde-/actions/workflows/snow.yml/dispatches -f ref=main`.
-- Plaine Morte webcam (Slopes, after the weather): Skaping camera used by the resort (https://www.skaping.com/crans-montana/plaine-morte).
-  One photo per hour; the page loads `https://skaping.s3.gra.io.cloud.ovh.net/crans-montana/plaine-morte/YYYY/MM/DD/large/HH-00.jpg`
-  in Swiss local time, falls back up to 3 hours, then shows a link. The photo links to the Skaping page (credit). If the URL pattern changes, read the og:image of the Skaping page.
-- Section headings and labels: Slopes (weather, webcam, live map, piste map, lift ticket number).
+- Webcam inside the weather card, following the altitude buttons: 1500 m = Golf-Club Crans-sur-Sierre driving range
+  (live image `https://www.golfcrans.ch/fr/api/webcam/Driving`, cache-busted every 10 min); 2200 m = Skaping Les Violettes;
+  3000 m = Skaping Plaine Morte (2880 m). Skaping photo times vary (e.g. 09:02), so `.github/workflows/webcams.yml` runs
+  `scripts/fetch_webcams.py` hourly: it reads the og:image of each Skaping page and writes `data/webcams.json` (keeps the previous photo on failure).
+  The page shows the photo date/time and credits the source; tap opens the camera page. These are the cameras listed on https://www.crans-montana.ch/fr/webcam.
+- Section headings and labels: Slopes (weather with webcam, live map, piste map, lift ticket number).
 
 ## Contents at a glance
 
@@ -49,7 +51,6 @@ Alexandre works from his iPhone only and does not edit code. He asks for changes
 
 ## Open points to check later
 
-- From the first snowfalls (November): confirm the SLF Montana plot (4MO0) returns data; if it stays empty, pick another station.
 - Gault&Millau 2027 scores (guide published 5 Oct 2026): update the tags in `src/restos.py`; Byakko entered the 2027 guide.
 - Each season: new piste map PDF link; new bus timetables from mid-December 2027 (2028 timetable year).
 

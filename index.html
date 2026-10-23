@@ -173,7 +173,9 @@ header { display: flex; align-items: center; justify-content: space-between; gap
 .camimg { display: block; border-radius: 12px; overflow: hidden; background: var(--bg); box-shadow: 0 0 0 1px var(--rule); aspect-ratio: 16 / 9; position: relative; text-decoration: none; }
 .camimg img { display: block; width: 100%; height: 100%; object-fit: cover; }
 .camimg span { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; text-align: center; padding: 16px; font-size: 14px; color: var(--mute); }
-.camcap { font-size: 13px !important; }
+.cam { display: flex; flex-direction: column; gap: 6px; }
+.camcap { margin: 0; font-size: 13px; color: var(--mute); line-height: 1.4; }
+.camcap b { color: var(--fg); font-weight: 600; }
 .live { border-radius: 12px; overflow: hidden; background: var(--bg); box-shadow: 0 0 0 1px var(--rule); }
 .live iframe { display: block; width: 100%; height: 62vh; min-height: 380px; border: 0; background: #fff; }
 .card .addr { color: var(--fg); font-size: 17px; line-height: 1.45; }
@@ -291,6 +293,10 @@ header { display: flex; align-items: center; justify-content: space-between; gap
       </div>
       <div id="wx-now" class="wxnow"><p>Loading the forecast…</p></div>
       <div id="wx-days" class="wxdays"></div>
+      <div class="cam">
+        <a class="camimg" id="cam-link" href="https://www.crans-montana.ch/fr/webcam" target="_blank" rel="noopener"><img id="cam-img" alt="" hidden><span id="cam-msg">Loading the webcam…</span></a>
+        <p class="camcap" id="cam-cap"></p>
+      </div>
       <div id="wx-snow" class="wxsnow"></div>
       <div id="snow-meas" class="meas"></div>
       <div class="actions">
@@ -298,11 +304,6 @@ header { display: flex; align-items: center; justify-content: space-between; gap
         <a class="btn" href="https://www.crans-montana.ch/fr/meteo" target="_blank" rel="noopener">Official Crans-Montana forecast</a>
       </div>
       <p class="wxnote">Forecast from MeteoSwiss's high-resolution model (ICON-CH, 1–2 km) via Open-Meteo, at three altitudes as on the resort's weather page. Measured depths come from SLF stations; model snow cover is only an estimate. The snow report gives the depths announced by the resort for the slopes.</p>
-    </section>
-    <section class="card cam">
-      <h2>Plaine Morte webcam</h2>
-      <a class="camimg" id="cam-link" href="https://www.skaping.com/crans-montana/plaine-morte" target="_blank" rel="noopener"><img id="cam-img" alt="Latest webcam photo of the Plaine Morte glacier" hidden><span id="cam-msg">Loading the latest photo…</span></a>
-      <p class="camcap" id="cam-cap">Glacier de la Plaine Morte, 2880 m, top of the ski area. Tap the photo for the full panorama and the archive.</p>
     </section>
     <section class="card">
       <h2>Live slopes and lifts</h2>
@@ -592,23 +593,38 @@ header { display: flex; align-items: center; justify-content: space-between; gap
       if (alt === a) wxRender(d);
     }).catch(() => { if (alt === a && !wxCache[a]) wxRender(undefined); });
   }
-  document.querySelectorAll('.wx .pill').forEach(p => p.addEventListener('click', () => { alt = +p.dataset.alt; store.set('alt', alt); wxLoad(); }));
-  // Plaine Morte webcam (Skaping): one photo per hour, path in Swiss local time
-  let camAt = 0;
-  function camLoad() {
-    if (Date.now() - camAt < 10 * 60000) return;
-    camAt = Date.now();
-    const parts = t => Object.fromEntries(new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Zurich', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', hourCycle: 'h23' }).formatToParts(t).map(p => [p.type, p.value]));
-    const img = $('cam-img'), msg = $('cam-msg');
-    let tries = 0;
-    const attempt = () => {
-      const p = parts(new Date(Date.now() - tries * 3600000));
-      img.onload = () => { img.hidden = false; msg.hidden = true; $('cam-cap').textContent = `Glacier de la Plaine Morte, 2880 m, top of the ski area. Photo of ${p.hour}:00 (Skaping). Tap for the full panorama and the archive.`; };
-      img.onerror = () => { tries++; if (tries < 4) attempt(); else { img.hidden = true; msg.hidden = false; msg.textContent = 'Webcam photo unavailable right now. Tap to open the webcam.'; } };
-      img.src = `https://skaping.s3.gra.io.cloud.ovh.net/crans-montana/plaine-morte/${p.year}/${p.month}/${p.day}/large/${p.hour}-00.jpg`;
+  document.querySelectorAll('.wx .pill').forEach(p => p.addEventListener('click', () => { alt = +p.dataset.alt; store.set('alt', alt); wxLoad(); camShow(); }));
+  // Webcam matching the selected altitude: golf (live image), Les Violettes and Plaine Morte (Skaping,
+  // latest photo URL found hourly by .github/workflows/webcams.yml into data/webcams.json)
+  const CAMS = [
+    { name: 'Crans, golf driving range', alt: 'about 1500 m', live: 'https://www.golfcrans.ch/fr/api/webcam/Driving', page: 'https://www.crans-montana.ch/fr/webcam', credit: 'Golf-Club Crans-sur-Sierre' },
+    { name: 'Les Violettes', alt: '2200 m', slug: 'les-violettes', page: 'https://www.skaping.com/crans-montana/les-violettes', credit: 'Skaping' },
+    { name: 'Plaine Morte glacier', alt: '2880 m', slug: 'plaine-morte', page: 'https://www.skaping.com/crans-montana/plaine-morte', credit: 'Skaping' }
+  ];
+  let camData = null, camDataAt = 0;
+  function camShow() {
+    const c = CAMS[alt], img = $('cam-img'), msg = $('cam-msg');
+    $('cam-link').href = c.page;
+    img.alt = 'Latest webcam photo: ' + c.name;
+    const fail = () => { img.hidden = true; msg.hidden = false; msg.textContent = 'Webcam photo unavailable right now. Tap to open the webcam.'; $('cam-cap').innerHTML = `<b>${c.name}</b>, ${c.alt}. Source: ${c.credit}.`; };
+    const show = (src, when) => {
+      img.hidden = true; msg.hidden = false; msg.textContent = 'Loading the webcam…';
+      img.onload = () => { img.hidden = false; msg.hidden = true; $('cam-cap').innerHTML = `<b>${c.name}</b>, ${c.alt}. ${when}. Source: ${c.credit}; tap the photo for the full view.`; };
+      img.onerror = fail;
+      img.src = src;
     };
-    attempt();
+    if (c.live) return show(c.live + '?t=' + Math.floor(Date.now() / 600000), 'Live image');
+    const go = () => {
+      const d = camData && camData[c.slug];
+      if (!d || !d.url) return fail();
+      let when = 'Latest photo';
+      if (d.taken) { const t = new Date(d.taken); if (!isNaN(t)) when = 'Photo of ' + t.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) + ', ' + d.taken.slice(11, 16); }
+      show(d.url, when);
+    };
+    if (camData && Date.now() - camDataAt < 10 * 60000) return go();
+    fetch('data/webcams.json?t=' + Math.floor(Date.now() / 600000)).then(r => r.ok ? r.json() : Promise.reject()).then(j => { camData = j; camDataAt = Date.now(); go(); }).catch(() => go());
   }
+  function camLoad() { camShow(); }
   let snowAt = 0;
   function snowLoad() {
     if (Date.now() - snowAt < 10 * 60000) return;
