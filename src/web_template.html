@@ -280,6 +280,7 @@ header { display: flex; align-items: center; justify-content: space-between; gap
       <div class="cam">
         <a class="camimg" id="cam-link" href="https://www.crans-montana.ch/fr/webcam" target="_blank" rel="noopener"><img id="cam-img" alt="" hidden><span id="cam-msg">Loading the webcam…</span></a>
         <p class="camcap" id="cam-cap"></p>
+        <a class="btn" id="cam-360" href="https://lhm.roundshot.com/" target="_blank" rel="noopener" hidden>Turn the view: 360° camera above Montana</a>
       </div>
       <div id="wx-snow" class="wxsnow"></div>
       <div id="snow-meas" class="meas"></div>
@@ -552,7 +553,7 @@ header { display: flex; align-items: center; justify-content: space-between; gap
   // Webcam matching the selected altitude: golf (live image), Les Violettes and Plaine Morte (Skaping,
   // latest photo URL found hourly by .github/workflows/webcams.yml into data/webcams.json)
   const CAMS = [
-    { name: 'Crans, Hôtel Le Splendide', alt: '1485 m', live: 'https://www.hotel-splendide.com/wp-content/uploads/2016/06/Webcam-Splendide-Crans-Montana.jpg', page: 'https://www.hotel-splendide.com/wp-content/uploads/2016/06/Webcam-Splendide-Crans-Montana.jpg', credit: 'Hôtel Le Splendide', tap: 'tap the photo to open it full size', when: 'Updated every hour' },
+    { name: 'Crans, Hôtel Le Splendide', alt: '1485 m', live: 'https://www.hotel-splendide.com/wp-content/uploads/2016/06/Webcam-Splendide-Crans-Montana.jpg', page: 'https://www.hotel-splendide.com/wp-content/uploads/2016/06/Webcam-Splendide-Crans-Montana.jpg', credit: 'Hôtel Le Splendide', tap: 'tap the photo to open it full size', when: 'Updated every hour', pano: 'https://lhm.roundshot.com/' },
     { name: 'Les Violettes', alt: '2200 m', slug: 'les-violettes', page: 'https://www.skaping.com/crans-montana/les-violettes', credit: 'Skaping' },
     { name: 'Plaine Morte glacier', alt: '2880 m', slug: 'plaine-morte', page: 'https://www.skaping.com/crans-montana/plaine-morte', credit: 'Skaping' }
   ];
@@ -560,6 +561,7 @@ header { display: flex; align-items: center; justify-content: space-between; gap
   function camShow() {
     const c = CAMS[alt], img = $('cam-img'), msg = $('cam-msg');
     $('cam-link').href = c.page;
+    $('cam-360').hidden = !c.pano;
     img.alt = 'Latest webcam photo: ' + c.name;
     const fail = () => { img.hidden = true; msg.hidden = false; msg.textContent = 'Webcam photo unavailable right now. Tap to open the webcam.'; $('cam-cap').innerHTML = `<b>${c.name}</b>, ${c.alt}. Source: ${c.credit}.`; };
     const show = (src, when) => {

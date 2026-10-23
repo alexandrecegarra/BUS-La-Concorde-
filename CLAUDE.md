@@ -38,8 +38,8 @@ Alexandre works from his iPhone only and does not edit code. He asks for changes
   The workflow can be triggered with `gh api -X POST repos/alexandrecegarra/BUS-La-Concorde-/actions/workflows/snow.yml/dispatches -f ref=main`.
 - Webcam inside the weather card, following the altitude buttons. 1500 m = Hôtel Le Splendide, Crans (1485 m), chosen by Alexandre
   because he wants Crans (not Montana) and a view like his apartment's; image `https://www.hotel-splendide.com/wp-content/uploads/2016/06/Webcam-Splendide-Crans-Montana.jpg`
-  (overwritten about hourly, cache-busted every 10 min; tap opens the image full size). Rejected for 1500 m: golf driving range (golfcrans.ch API)
-  and the Montana Roundshot (lhm.roundshot.com, Clinique Lucernoise). 2200 m = Skaping Les Violettes; 3000 m = Skaping Plaine Morte (2880 m).
+  (overwritten about hourly, cache-busted every 10 min; tap opens the image full size). Rejected as the 1500 m photo: golf driving range (golfcrans.ch API, fixed still)
+  and the Montana Roundshot. No camera in Crans can be turned, so at 1500 m only a secondary button opens the 360° Roundshot above Montana (https://lhm.roundshot.com/, Clinique Lucernoise), which can be turned towards the Rhône valley. 2200 m = Skaping Les Violettes; 3000 m = Skaping Plaine Morte (2880 m).
   Skaping photo times vary (e.g. 09:02), so `.github/workflows/webcams.yml` runs `scripts/fetch_webcams.py` hourly: it reads the og:image of
   each Skaping page and writes `data/webcams.json` (keeps the previous photo on failure). Skaping photos open the Skaping viewer (big, can be turned).
   Never link to the resort's webcam list page. Cameras listed on https://www.crans-montana.ch/fr/webcam.
