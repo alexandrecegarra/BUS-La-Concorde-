@@ -32,7 +32,8 @@ for slug, page in ROUNDSHOT.items():
         r = urllib.request.urlopen(urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0 (la-concorde-guest-site)'}), timeout=30)
         ctype = r.headers.get('Content-Type', '')
         final = r.geturl()
-        out[slug] = {'url': final if ctype.startswith('image/') else None, 'og': url, 'type': ctype, 'taken': None, 'page': page}
+        t = re.search(r'/(\d{4}-\d{2}-\d{2})/(\d{2})-(\d{2})-\d{2}/', final)
+        out[slug] = {'url': final if ctype.startswith('image/') else None, 'taken': f'{t[1]}T{t[2]}:{t[3]}' if t else None, 'page': page}
     except Exception as e:
         out[slug] = prev.get(slug, {'url': None, 'taken': None, 'page': page, 'error': str(e)[:200]})
 json.dump(out, open(path, 'w'), ensure_ascii=False, indent=1)

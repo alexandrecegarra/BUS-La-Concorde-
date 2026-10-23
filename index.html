@@ -172,6 +172,8 @@ header { display: flex; align-items: center; justify-content: space-between; gap
 .wx svg .flake { stroke: var(--sky); }
 .camimg { display: block; border-radius: 12px; overflow: hidden; background: var(--bg); box-shadow: 0 0 0 1px var(--rule); aspect-ratio: 16 / 9; position: relative; text-decoration: none; }
 .camimg img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.camimg.pano { aspect-ratio: auto; height: 210px; overflow-x: auto; overflow-y: hidden; -webkit-overflow-scrolling: touch; }
+.camimg.pano img { width: auto; max-width: none; height: 100%; object-fit: contain; }
 .camimg span { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; text-align: center; padding: 16px; font-size: 14px; color: var(--mute); }
 .cam { display: flex; flex-direction: column; gap: 6px; }
 .camcap { margin: 0; font-size: 13px; color: var(--mute); line-height: 1.4; }
@@ -296,7 +298,6 @@ header { display: flex; align-items: center; justify-content: space-between; gap
       <div class="cam">
         <a class="camimg" id="cam-link" href="https://www.crans-montana.ch/fr/webcam" target="_blank" rel="noopener"><img id="cam-img" alt="" hidden><span id="cam-msg">Loading the webcam…</span></a>
         <p class="camcap" id="cam-cap"></p>
-        <a class="btn" id="cam-360" href="https://lhm.roundshot.com/" target="_blank" rel="noopener" hidden>Turn the view: 360° camera above Montana</a>
       </div>
       <div id="wx-snow" class="wxsnow"></div>
       <div id="snow-meas" class="meas"></div>
@@ -598,7 +599,7 @@ header { display: flex; align-items: center; justify-content: space-between; gap
   // Webcam matching the selected altitude: golf (live image), Les Violettes and Plaine Morte (Skaping,
   // latest photo URL found hourly by .github/workflows/webcams.yml into data/webcams.json)
   const CAMS = [
-    { name: 'Crans, Hôtel Le Splendide', alt: '1485 m', live: 'https://www.hotel-splendide.com/wp-content/uploads/2016/06/Webcam-Splendide-Crans-Montana.jpg', page: 'https://www.hotel-splendide.com/wp-content/uploads/2016/06/Webcam-Splendide-Crans-Montana.jpg', credit: 'Hôtel Le Splendide', tap: 'tap the photo to open it full size', when: 'Updated every hour', pano: 'https://lhm.roundshot.com/' },
+    { name: 'Montana, 360° camera', alt: 'about 1500 m', slug: 'montana-360', pano: true, page: 'https://lhm.roundshot.com/', credit: 'Roundshot, Crans-Montana', tap: 'swipe the panorama to look around, tap it for the interactive 360° view' },
     { name: 'Les Violettes', alt: '2200 m', slug: 'les-violettes', page: 'https://www.skaping.com/crans-montana/les-violettes', credit: 'Skaping' },
     { name: 'Plaine Morte glacier', alt: '2880 m', slug: 'plaine-morte', page: 'https://www.skaping.com/crans-montana/plaine-morte', credit: 'Skaping' }
   ];
@@ -606,7 +607,7 @@ header { display: flex; align-items: center; justify-content: space-between; gap
   function camShow() {
     const c = CAMS[alt], img = $('cam-img'), msg = $('cam-msg');
     $('cam-link').href = c.page;
-    $('cam-360').hidden = !c.pano;
+    $('cam-link').classList.toggle('pano', !!c.pano);
     img.alt = 'Latest webcam photo: ' + c.name;
     const fail = () => { img.hidden = true; msg.hidden = false; msg.textContent = 'Webcam photo unavailable right now. Tap to open the webcam.'; $('cam-cap').innerHTML = `<b>${c.name}</b>, ${c.alt}. Source: ${c.credit}.`; };
     const show = (src, when) => {
@@ -621,6 +622,15 @@ header { display: flex; align-items: center; justify-content: space-between; gap
       if (!d || !d.url) return fail();
       let when = 'Latest photo';
       if (d.taken) { const t = new Date(d.taken); if (!isNaN(t)) when = 'Photo of ' + t.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) + ', ' + d.taken.slice(11, 16); }
+      if (c.pano) {
+        const sizes = [d.url.replace('_full.jpg', '_quarter.jpg'), d.url.replace('_full.jpg', '_half.jpg'), d.url];
+        let k = 0;
+        img.hidden = true; msg.hidden = false; msg.textContent = 'Loading the panorama…';
+        img.onload = () => { img.hidden = false; msg.hidden = true; const l = $('cam-link'); l.scrollLeft = (img.scrollWidth - l.clientWidth) / 2; $('cam-cap').innerHTML = `<b>${c.name}</b>, ${c.alt}. ${when}. Source: ${c.credit}; ${c.tap}.`; };
+        img.onerror = () => { k++; if (k < sizes.length) img.src = sizes[k]; else fail(); };
+        img.src = sizes[0];
+        return;
+      }
       show(d.url, when);
     };
     if (camData && Date.now() - camDataAt < 10 * 60000) return go();
