@@ -1,5 +1,5 @@
 {
- "updated": "2026-10-24T04:50+00:00",
+ "updated": "2026-10-24T07:03+00:00",
  "source": "WSL Institute for Snow and Avalanche Research SLF, www.slf.ch (CC BY 4.0)",
  "stations": [
   {
@@ -7,9 +7,9 @@
    "label": "Montana",
    "elevation": 1590,
    "note": "Observer plot in the resort, measured every morning in season",
-   "hs": 0,
-   "date": "2026-10-22T06:00:00Z",
-   "new24": 0
+   "hs": 4,
+   "date": "2026-10-24T06:00:00Z",
+   "new24": 4
   },
   {
    "code": "TRU2",
@@ -17,7 +17,7 @@
    "elevation": 2459,
    "note": "Automatic station, 9 km east of Crans-Montana",
    "hs": 22,
-   "date": "2026-10-24T04:30:00Z",
+   "date": "2026-10-24T06:30:00Z",
    "new24": null
   }
  ]
