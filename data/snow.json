@@ -1,5 +1,5 @@
 {
- "updated": "2026-10-25T20:46+00:00",
+ "updated": "2026-10-25T22:44+00:00",
  "source": "WSL Institute for Snow and Avalanche Research SLF, www.slf.ch (CC BY 4.0)",
  "stations": [
   {
@@ -16,8 +16,8 @@
    "label": "Trubelboden",
    "elevation": 2459,
    "note": "Automatic station, 9 km east of Crans-Montana",
-   "hs": 22,
-   "date": "2026-10-25T20:30:00Z",
+   "hs": 20,
+   "date": "2026-10-25T22:30:00Z",
    "new24": null
   }
  ]
