@@ -1,5 +1,5 @@
 {
- "updated": "2026-11-15T01:58+00:00",
+ "updated": "2026-11-15T09:35+00:00",
  "source": "WSL Institute for Snow and Avalanche Research SLF, www.slf.ch (CC BY 4.0)",
  "stations": [
   {
@@ -7,17 +7,17 @@
    "label": "Montana",
    "elevation": 1590,
    "note": "Observer plot in the resort, measured every morning in season",
-   "hs": 0,
-   "date": "2026-11-14T06:00:00Z",
-   "new24": 0
+   "hs": 1,
+   "date": "2026-11-15T06:00:00Z",
+   "new24": 1
   },
   {
    "code": "TRU2",
    "label": "Trubelboden",
    "elevation": 2459,
    "note": "Automatic station, 9 km east of Crans-Montana",
-   "hs": 21,
-   "date": "2026-11-15T01:30:00Z",
+   "hs": 25,
+   "date": "2026-11-15T09:00:00Z",
    "new24": null
   }
  ]
